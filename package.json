@@ -1,16 +1,16 @@
 {
   "private": true,
-  "displayName": "Plugin Name",
-  "name": "homebridge-plugin-name",
-  "version": "1.0.0",
-  "description": "A short description about what your plugin does.",
+  "displayName": "Hoffmation",
+  "name": "homebridge-hoffmation",
+  "version": "0.0.1",
+  "description": "Connecting Hoffmation Devices to HomeKit",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/USERNAME/GITHUB_PROJECT_NAME.git"
+    "url": "https://github.com/Hoffmation/homebridge-hoffmation"
   },
   "bugs": {
-    "url": "https://github.com/USERNAME/GITHUB_PROJECT_NAME/issues"
+    "url": "https://github.com/Hoffmation/homebridge-hoffmation/issues"
   },
   "engines": {
     "node": "^18.17.0",
@@ -31,6 +31,7 @@
     "@types/node": "^18.16.20",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
+    "hoffmation-base": "2.10.1",
     "eslint": "^8.45.0",
     "homebridge": "^1.6.0",
     "nodemon": "^2.0.22",

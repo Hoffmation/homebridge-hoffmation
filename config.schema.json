@@ -1,5 +1,5 @@
 {
-  "pluginAlias": "ExampleHomebridgePlugin",
+  "pluginAlias": "Hoffmation",
   "pluginType": "platform",
   "singular": true,
   "schema": {
@@ -10,6 +10,12 @@
         "type": "string",
         "required": true,
         "default": "Example Dynamic Platform"
+      },
+      "serverAddress": {
+        "title": "Server Address",
+        "type": "string",
+        "required": true,
+        "default": "http://localhost:3000"
       }
     }
   }
