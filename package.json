@@ -26,6 +26,7 @@
     "prepare": "npm run build",
     "prepublishOnly": "npm run lint && npm run build",
     "pre-release-check": "npm run build",
+    "release": "release-script",
     "release-patch-pre": "npm run pre-release-check && npm run release prerelease --",
     "release-patch": "npm run pre-release-check && npm run release patch --",
     "release-minor": "npm run pre-release-check && npm run release minor --",
