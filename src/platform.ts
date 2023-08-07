@@ -1,10 +1,9 @@
 import { API, Characteristic, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
-import { HoffmationLamp } from './accesories/HoffmationLampAccessory';
+import { HoffmationDevice } from './accesories/HoffmationDevice';
 import { HoffmationConfig } from './models/config';
 import { HoffmationApi } from './api';
-import { iBaseDevice } from 'hoffmation-base';
 import { DeviceCapability } from 'hoffmation-base/lib/server/devices/DeviceCapability';
 import { HoffmationApiDevice } from './models/hoffmationApi/hoffmationApiDevice';
 
@@ -20,6 +19,7 @@ export class Hoffmation implements DynamicPlatformPlugin {
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];
   private readonly _api: HoffmationApi;
+  private devicesDict: { [id: string] : HoffmationDevice } = {};
 
   constructor(
     public readonly log: Logger,
@@ -68,7 +68,19 @@ export class Hoffmation implements DynamicPlatformPlugin {
 
       this.log.info(`Connection established got ${devices.length} devices`);
       this.processDevices(devices);
+      setInterval(this.updateAllDevices.bind(this), 15000);
     });
+  }
+
+  private async updateAllDevices(): Promise<void> {
+    const devices = await this._api.getDevices();
+    if(!devices || devices.length === 0) {
+      this.log.error('No devices found');
+      return;
+    }
+    for (const device of devices) {
+      this.devicesDict[device.id]?.processUpdate(device);
+    }
   }
 
   private processDevices(devices: HoffmationApiDevice[]): void {
@@ -76,30 +88,35 @@ export class Hoffmation implements DynamicPlatformPlugin {
     const usedIds: string[] = [];
     for (const device of devices) {
       this.log.debug(`Processing ${device.id} with capabilities ${device.deviceCapabilities}`);
-      if(!device.deviceCapabilities.includes(DeviceCapability.lamp)) {
+      if(
+        !device.deviceCapabilities.includes(DeviceCapability.dimmablelamp) &&
+        !device.deviceCapabilities.includes(DeviceCapability.lamp) &&
+        !device.deviceCapabilities.includes(DeviceCapability.actuator) &&
+        !device.deviceCapabilities.includes(DeviceCapability.scene) &&
+        !device.deviceCapabilities.includes(DeviceCapability.temperatureSensor) &&
+        !device.deviceCapabilities.includes(DeviceCapability.shutter) &&
+        !device.deviceCapabilities.includes(DeviceCapability.motionSensor)
+      ) {
         continue;
       }
-      usedIds.push(device.id);
       // generate a unique id for the accessory this should be generated from
       // something globally unique, but constant, for example, the device serial
       // number or MAC address
       const uuid = this.api.hap.uuid.generate(device.id);
+      usedIds.push(uuid);
 
       // see if an accessory with the same uuid has already been registered and restored from
       // the cached devices we stored in the `configureAccessory` method above
       const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
 
-      if (existingAccessory) {
+      if (existingAccessory !== undefined) {
         // the accessory already exists
         this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
-
-        // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-        // existingAccessory.context.device = device;
-        // this.api.updatePlatformAccessories([existingAccessory]);
+        existingAccessory.displayName = device.name;
 
         // create the accessory handler for the restored accessory
         // this is imported from `platformAccessory.ts`
-        new HoffmationLamp(this, existingAccessory, device, this._api);
+        this.devicesDict[device.id] = new HoffmationDevice(this, existingAccessory, device, this._api);
 
         // it is possible to remove platform accessories at any time using `api.unregisterPlatformAccessories`, eg.:
         // remove platform accessories when no longer present
@@ -109,14 +126,14 @@ export class Hoffmation implements DynamicPlatformPlugin {
       }
 
       // the accessory does not yet exist, so we need to create it
-      this.log.info('Adding new accessory:', device.info.fullName);
+      this.log.info('Adding new accessory:', device.name);
 
       // create a new accessory
-      const accessory = new this.api.platformAccessory(device.info.fullName, uuid);
+      const accessory = new this.api.platformAccessory(device.name, uuid);
 
       // create the accessory handler for the newly create accessory
       // this is imported from `platformAccessory.ts`
-      new HoffmationLamp(this, accessory, device, this._api);
+      this.devicesDict[device.id] = new HoffmationDevice(this, accessory, device, this._api);
 
       // link the accessory to your platform
       this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
@@ -125,6 +142,6 @@ export class Hoffmation implements DynamicPlatformPlugin {
     this.api.unregisterPlatformAccessories(
       PLUGIN_NAME,
       PLATFORM_NAME,
-      this.accessories.filter((accessory) => !usedIds.includes(accessory.UUID)))
+      this.accessories.filter((accessory) => !usedIds.includes(accessory.UUID)));
   }
 }

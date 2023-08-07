@@ -17,7 +17,6 @@ export class HoffmationApi {
     const data = await HoffmationApi.performGetObjectRequest(`${this.serverAddress}/devices`) as { [id: string]: unknown };
     const result: HoffmationApiDevice[] = [];
     for (const key of Object.keys(data)) {
-      this.log.debug(`Found device ${key}`);
       result.push(new HoffmationApiDevice(data[key] as { [key: string]: unknown }));
     }
     return result;
@@ -31,9 +30,36 @@ export class HoffmationApi {
     return new HoffmationApiDevice(data as { [key: string]: unknown });
   }
 
+  public async setActuator(id: string, desiredState: boolean): Promise<string> {
+    const result = await HoffmationApi.performGetStringRequest(`${this.serverAddress}/actuator/${id}/${desiredState}`);
+    this.log.debug(`setActuator ${id} to ${desiredState} with result ${result}`);
+    return result;
+  }
+
+  public async setScene(id: string, desiredState: boolean): Promise<string> {
+    const url = `${this.serverAddress}/scene/${id}/${(desiredState ? 'start/0' : 'end')}`;
+    const result = await HoffmationApi.performGetStringRequest(url);
+    this.log.debug(`setScene ${id} to ${desiredState} with result ${result}`);
+    return result;
+  }
+
   public async setLamp(id: string, desiredState: boolean): Promise<string> {
     const result = await HoffmationApi.performGetStringRequest(`${this.serverAddress}/lamps/${id}/${desiredState}`);
     this.log.debug(`Set Lamp ${id} to ${desiredState} with result ${result}`);
+    return result;
+  }
+
+  public async setBrightness(id: string, desiredBrightness: number): Promise<string> {
+    const state = desiredBrightness > 0;
+    const result =
+      await HoffmationApi.performGetStringRequest(`${this.serverAddress}/dimmer/${id}/${state}/${desiredBrightness}`);
+    this.log.debug(`Set Brightness ${id} to ${desiredBrightness} with result ${result}`);
+    return result;
+  }
+
+  public async setShuter(id: string, desiredPos: number): Promise<string> {
+    const result = await HoffmationApi.performGetStringRequest(`${this.serverAddress}/shutter/${id}/${desiredPos}`);
+    this.log.debug(`Set Shutter ${id} to ${desiredPos} with result ${result}`);
     return result;
   }
 
