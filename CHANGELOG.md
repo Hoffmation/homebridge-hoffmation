@@ -5,5 +5,7 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
+## **WORK IN PROGRESS**
+* (theimo1221) Fix dependency issue with hoffmation-base
 ## 0.1.0 (2023-08-07)
 * (theimo1221) Initial Version with lights, scenes, dimmer, actuator, motion sensor, temperature sensor, shutter

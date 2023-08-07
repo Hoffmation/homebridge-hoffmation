@@ -35,13 +35,14 @@
   "keywords": [
     "homebridge-plugin"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "hoffmation-base": "2.10.1"
+  },
   "devDependencies": {
     "@alcalzone/release-script": "^3.6.0",
     "@types/node": "^20.4.8",
     "@typescript-eslint/eslint-plugin": "^6.3.0",
     "@typescript-eslint/parser": "^6.3.0",
-    "hoffmation-base": "2.10.1",
     "eslint": "^8.46.0",
     "homebridge": "^1.6.1",
     "nodemon": "^3.0.1",
