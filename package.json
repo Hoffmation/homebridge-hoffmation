@@ -1,5 +1,4 @@
 {
-  "private": true,
   "displayName": "Hoffmation",
   "name": "homebridge-hoffmation",
   "version": "0.0.1",
@@ -18,9 +17,13 @@
   },
   "main": "dist/index.js",
   "scripts": {
+    "check-package-upgrades": "npx npm-check-updates -i",
     "lint": "eslint src/**.ts --max-warnings=0",
+    "lint-check-all": "eslint ./**/{*.js,*.ts,*.test.ts} --no-error-on-unmatched-pattern",
+    "lint-fix-all": "eslint ./**/{*.ts,*.test.ts} --fix --no-error-on-unmatched-pattern",
     "watch": "npm run build && npm link && nodemon",
     "build": "rimraf ./dist && tsc",
+    "prepare": "npm run build",
     "prepublishOnly": "npm run lint && npm run build"
   },
   "keywords": [
@@ -28,15 +31,15 @@
   ],
   "dependencies": {},
   "devDependencies": {
-    "@types/node": "^18.16.20",
-    "@typescript-eslint/eslint-plugin": "^5.62.0",
-    "@typescript-eslint/parser": "^5.62.0",
+    "@types/node": "^20.4.8",
+    "@typescript-eslint/eslint-plugin": "^6.3.0",
+    "@typescript-eslint/parser": "^6.3.0",
     "hoffmation-base": "2.10.1",
-    "eslint": "^8.45.0",
-    "homebridge": "^1.6.0",
-    "nodemon": "^2.0.22",
-    "rimraf": "^3.0.2",
+    "eslint": "^8.46.0",
+    "homebridge": "^1.6.1",
+    "nodemon": "^3.0.1",
+    "rimraf": "^5.0.1",
     "ts-node": "^10.9.1",
-    "typescript": "^4.9.5"
+    "typescript": "^5.1.6"
   }
 }
