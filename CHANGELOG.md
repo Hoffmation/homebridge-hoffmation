@@ -5,8 +5,7 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
-
-## **WORK IN PROGRESS**
+## 0.2.1 (2023-08-10)
 
 * (theimo1221) Fix negative shutter positions
 
