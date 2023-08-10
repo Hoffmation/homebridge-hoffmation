@@ -1,4 +1,4 @@
-import { API, Characteristic, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
+import { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service } from 'homebridge';
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 import { HoffmationDevice } from './accesories/HoffmationDevice';
@@ -22,7 +22,7 @@ export class Hoffmation implements DynamicPlatformPlugin {
   private devicesDict: { [id: string] : HoffmationDevice } = {};
 
   constructor(
-    public readonly log: Logger,
+    public readonly log: Logging,
     public readonly config: PlatformConfig,
     public readonly api: API,
   ) {
@@ -89,6 +89,7 @@ export class Hoffmation implements DynamicPlatformPlugin {
     for (const device of devices) {
       this.log.debug(`Processing ${device.id} with capabilities ${device.deviceCapabilities}`);
       if(
+        !device.deviceCapabilities.includes(DeviceCapability.camera) &&
         !device.deviceCapabilities.includes(DeviceCapability.dimmablelamp) &&
         !device.deviceCapabilities.includes(DeviceCapability.lamp) &&
         !device.deviceCapabilities.includes(DeviceCapability.actuator) &&
@@ -136,7 +137,11 @@ export class Hoffmation implements DynamicPlatformPlugin {
       this.devicesDict[device.id] = new HoffmationDevice(this, accessory, device, this._api);
 
       // link the accessory to your platform
-      this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+      if(device.deviceCapabilities.includes(DeviceCapability.camera)) {
+        this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
+      } else {
+        this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+      }
     }
 
     this.api.unregisterPlatformAccessories(

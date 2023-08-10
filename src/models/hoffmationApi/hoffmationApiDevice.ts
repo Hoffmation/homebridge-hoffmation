@@ -2,13 +2,20 @@ import { DeviceCapability } from 'hoffmation-base/lib/server/devices/DeviceCapab
 import { HoffmationApiDeviceInfo } from './HoffmationApiDeviceInfo';
 
 export class HoffmationApiDevice {
+  public get videoUrl(): string {
+    return (this.rawData['h264IosStreamLink'] ?? this.rawData['mpegStreamLink']) as string ?? '';
+  }
+
+  public get snapshotUrl(): string {
+    return (this.rawData['currentImageLink'] as string) ?? '';
+  }
 
   public get deviceCapabilities(): DeviceCapability[] {
     return (this.rawData['_deviceCapabilities'] ?? this.rawData['deviceCapabilities']) as DeviceCapability[] ?? [];
   }
 
   public get info(): HoffmationApiDeviceInfo {
-    return (this.rawData['_info'] ?? this.rawData['info'] ) as HoffmationApiDeviceInfo;
+    return (this.rawData['_info'] ?? this.rawData['info']) as HoffmationApiDeviceInfo;
   }
 
   public get id(): string {

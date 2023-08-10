@@ -4,6 +4,7 @@ import { Hoffmation } from '../platform';
 import { HoffmationApi } from '../api';
 import { DeviceCapability } from 'hoffmation-base/lib/server/devices/DeviceCapability';
 import { HoffmationApiDevice } from '../models/hoffmationApi/hoffmationApiDevice';
+import { CameraDelegate } from '../CameraHandling/CameraDelegate';
 
 /**
  * Platform Accessory
@@ -93,6 +94,12 @@ export class HoffmationDevice {
       );
       this.temperatureService.getCharacteristic(this.platform.Characteristic.CurrentTemperature)
         .onGet(this.getTemperature.bind(this));
+    }
+    if (caps.includes(DeviceCapability.camera)) {
+      const delegate = new CameraDelegate(this.platform, accessory, this.device)
+      accessory.configureController(
+        delegate.controller,
+      );
     }
   }
 
