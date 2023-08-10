@@ -5,6 +5,11 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
+
+## **WORK IN PROGRESS**
+
+* (theimo1221) Fix negative shutter positions
+
 ## 0.2.0 (2023-08-10)
 
 * (theimo1221) Add onboard Camera Handling to Hoffmation

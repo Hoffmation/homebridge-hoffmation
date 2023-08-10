@@ -28,7 +28,7 @@ export class HoffmationApiDevice {
 
 
   public get currentShutterPosition(): number {
-    return (this.rawData['_currentLevel']) as number ?? 0;
+    return Math.max(Math.min((this.rawData['_currentLevel']) as number ?? 0, 100), 0);
   }
 
 
