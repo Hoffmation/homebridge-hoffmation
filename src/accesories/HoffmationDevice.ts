@@ -19,6 +19,7 @@ export class HoffmationDevice {
   private shutterService: Service | undefined;
   private temperatureService: Service | undefined;
   private cachedDevice: HoffmationApiDevice | undefined;
+  private acService: Service | undefined;
 
   constructor(
     private readonly platform: Hoffmation,
@@ -96,10 +97,24 @@ export class HoffmationDevice {
         .onGet(this.getTemperature.bind(this));
     }
     if (caps.includes(DeviceCapability.camera)) {
-      const delegate = new CameraDelegate(this.platform, accessory, this.device)
+      const delegate = new CameraDelegate(this.platform, accessory, this.device);
       accessory.configureController(
         delegate.controller,
       );
+    }
+    if (caps.includes(DeviceCapability.ac)) {
+      this.acService = this.accessory.getService(this.platform.Service.HeaterCooler) ||
+        this.accessory.addService(this.platform.Service.HeaterCooler);
+
+      this.acService.getCharacteristic(this.platform.Characteristic.Active)
+        .onGet(this.getAcOn.bind(this))
+        .onSet(this.setAcOn.bind(this));
+
+      this.acService.getCharacteristic(this.platform.Characteristic.CurrentHeaterCoolerState)
+        .onGet(this.getCurrentAcState.bind(this));
+
+      this.acService.getCharacteristic(this.platform.Characteristic.CurrentTemperature)
+        .onGet(this.getAcTemp.bind(this));
     }
   }
 
@@ -129,6 +144,24 @@ export class HoffmationDevice {
     if (caps.includes(DeviceCapability.shutter)) {
       this.shutterService?.updateCharacteristic(this.platform.Characteristic.CurrentPosition, data.currentShutterPosition);
     }
+    if (caps.includes(DeviceCapability.scene)) {
+      this.sceneService?.updateCharacteristic(this.platform.Characteristic.On, data.sceneOn ?? false);
+    }
+    if (caps.includes(DeviceCapability.ac)) {
+      this.acService?.updateCharacteristic(
+        this.platform.Characteristic.Active,
+        (data.acOn ?? false) ? 1 : 0,
+      );
+      this.acService?.updateCharacteristic(
+        this.platform.Characteristic.CurrentHeaterCoolerState,
+        data.currentAcMode === 3 ? this.platform.Characteristic.CurrentHeaterCoolerState.COOLING
+          : this.platform.Characteristic.CurrentHeaterCoolerState.HEATING,
+      );
+      this.acService?.updateCharacteristic(
+        this.platform.Characteristic.CurrentTemperature,
+        data.roomTemperature ?? -99,
+      );
+    }
   }
 
   async setBrightness(value: CharacteristicValue) {
@@ -146,6 +179,13 @@ export class HoffmationDevice {
     } else if (this.device.deviceCapabilities.includes(DeviceCapability.scene)) {
       await this.api.setScene(this.device.id, value as boolean);
     }
+    await this.updateSelf();
+  }
+
+  async setAcOn(value: CharacteristicValue) {
+    const boolValue = value as number === 1;
+    this.platform.log.info('Set Ac On ->', boolValue);
+    await this.api.setAcOn(this.device.id, boolValue);
     await this.updateSelf();
   }
 
@@ -183,6 +223,38 @@ export class HoffmationDevice {
       return false;
     }
     return this.getActuatorOn();
+  }
+
+  async getAcOn(): Promise<CharacteristicValue> {
+    if (!this.device.deviceCapabilities.includes(DeviceCapability.ac)) {
+      return false;
+    }
+    if (this.cachedDevice !== undefined) {
+      return (this.cachedDevice.acOn ?? false) ? 1 : 0;
+    }
+
+    const update = await this.updateSelf();
+    if (!update) {
+      return false;
+    }
+    return this.getAcOn();
+  }
+
+  async getCurrentAcState(): Promise<CharacteristicValue> {
+    if (!this.device.deviceCapabilities.includes(DeviceCapability.ac)) {
+      return false;
+    }
+    if (this.cachedDevice !== undefined) {
+      return this.cachedDevice.currentAcMode === 3
+        ? this.platform.Characteristic.CurrentHeaterCoolerState.COOLING
+        : this.platform.Characteristic.CurrentHeaterCoolerState.HEATING;
+    }
+
+    const update = await this.updateSelf();
+    if (!update) {
+      return false;
+    }
+    return this.getCurrentAcState();
   }
 
   async getSceneOn(): Promise<CharacteristicValue> {
@@ -243,6 +315,21 @@ export class HoffmationDevice {
       return 0;
     }
     return this.getShutterCurrentPos();
+  }
+
+  async getAcTemp(): Promise<CharacteristicValue> {
+    if (!this.device.deviceCapabilities.includes(DeviceCapability.ac)) {
+      return -99;
+    }
+    if (this.cachedDevice !== undefined) {
+      return this.cachedDevice.roomTemperature;
+    }
+
+    const update = await this.updateSelf();
+    if (!update) {
+      return -99;
+    }
+    return this.getAcTemp();
   }
 
   async getTemperature(): Promise<CharacteristicValue> {

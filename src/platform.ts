@@ -89,6 +89,7 @@ export class Hoffmation implements DynamicPlatformPlugin {
     for (const device of devices) {
       this.log.debug(`Processing ${device.id} with capabilities ${device.deviceCapabilities}`);
       if(
+        !device.deviceCapabilities.includes(DeviceCapability.ac) &&
         !device.deviceCapabilities.includes(DeviceCapability.camera) &&
         !device.deviceCapabilities.includes(DeviceCapability.dimmablelamp) &&
         !device.deviceCapabilities.includes(DeviceCapability.lamp) &&

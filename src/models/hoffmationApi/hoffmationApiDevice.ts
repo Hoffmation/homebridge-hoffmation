@@ -37,6 +37,11 @@ export class HoffmationApiDevice {
       this.rawData['actuatorOn']) as boolean | undefined;
   }
 
+  public get acOn(): boolean | undefined {
+    return (this.rawData['_on'] ??
+      this.rawData['on']) as boolean | undefined;
+  }
+
 
   public get sceneOn(): boolean | undefined {
     return (this.rawData['_on'] ??
@@ -63,6 +68,13 @@ export class HoffmationApiDevice {
       false;
   }
 
+  public get currentAcMode(): number {
+    return (this.rawData['desiredMode']) as number ?? 0;
+  }
+
+  public get roomTemperature(): number {
+    return (this.rawData['_roomTemperature']) as number ?? -99;
+  }
 
   public get temperature(): number {
     return (this.rawData['_temperature']) as number ?? -99;

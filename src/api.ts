@@ -36,6 +36,12 @@ export class HoffmationApi {
     return result;
   }
 
+  public async setAcOn(id: string, desiredState: boolean): Promise<string> {
+    const result = await HoffmationApi.performGetStringRequest(`${this.serverAddress}/ac/${id}/power/${desiredState}`);
+    this.log.debug(`set AC ${id} to ${desiredState} with result ${result}`);
+    return result;
+  }
+
   public async setScene(id: string, desiredState: boolean): Promise<string> {
     const url = `${this.serverAddress}/scene/${id}/${(desiredState ? 'start/0' : 'end')}`;
     const result = await HoffmationApi.performGetStringRequest(url);
