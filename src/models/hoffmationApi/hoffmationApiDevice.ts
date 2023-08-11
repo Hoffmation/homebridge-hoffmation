@@ -2,8 +2,12 @@ import { DeviceCapability } from 'hoffmation-base/lib/server/devices/DeviceCapab
 import { HoffmationApiDeviceInfo } from './HoffmationApiDeviceInfo';
 
 export class HoffmationApiDevice {
-  public get videoUrl(): string {
+  public get rtspUrl(): string {
     return (this.rawData['rtspStreamLink']) as string ?? '';
+  }
+
+  public get h264IosStreamLink(): string {
+    return (this.rawData['h264IosStreamLink']) as string ?? '';
   }
 
   public get snapshotUrl(): string {

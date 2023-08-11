@@ -56,14 +56,22 @@ export class CameraDelegate implements CameraStreamingDelegate {
     private readonly accessory: PlatformAccessory,
     private readonly device: HoffmationApiDevice,
   ) {
-    this.videoUrl = device.videoUrl;
+    const useRtsp = false;
+    if (useRtsp) {
+      this.videoUrl = `-rtsp_transport tcp -re -i ${device.rtspUrl}`;
+    } else {
+      this.videoUrl = `-i ${device.h264IosStreamLink.replace('/temp.m', '/temp.ts')}`;
+    }
     this.log = platform.log;
     this.ffmpegLog = new FfmpegLogger(this.log);
     this.log.debug(`Creating new CameraDelegate for ${this.device.name} with videoUrl ${this.videoUrl}`);
     this.videoConfig = {
-      source: `-rtsp_transport tcp -probesize 32 -analyzeduration 0 -re -i ${this.videoUrl}`,
+      source: this.videoUrl,
       vcodec: 'copy',
-      packetSize: 1600,
+      // maxStreams: 4,
+      // maxWidth: 1920,
+      // maxHeight: 1080,
+      // maxFPS: 5,
     };
     this.videoProcessor = 'ffmpeg';
     platform.api.on(APIEvent.SHUTDOWN, () => {
@@ -79,14 +87,20 @@ export class CameraDelegate implements CameraStreamingDelegate {
         video: {
           resolutions: [
             [1280, 720, 30],
+            [1280, 720, 5],
             [1024, 768, 30],
+            [1024, 768, 5],
             [640, 480, 30],
+            [640, 480, 5],
             [640, 360, 30],
             [480, 360, 30],
+            [480, 360, 5],
             [480, 270, 30],
             [320, 240, 30],
+            [320, 240, 5],
             [320, 240, 15], // Apple Watch requires this configuration
             [320, 180, 30],
+            [320, 180, 5],
           ],
           codec: {
             profiles: [hap.H264Profile.BASELINE, hap.H264Profile.MAIN, hap.H264Profile.HIGH],
@@ -303,6 +317,7 @@ export class CameraDelegate implements CameraStreamingDelegate {
       ' -color_range mpeg' +
       (fps > 0 ? ' -r ' + fps : '') +
       ' -f rawvideo' +
+      // ' -f rtsp' +
       (encoderOptions ? ' ' + encoderOptions : '') +
       (resolution.videoFilter ? ' -filter:v ' + resolution.videoFilter : '') +
       (videoBitrate > 0 ? ' -b:v ' + videoBitrate + 'k' : '') +
@@ -319,15 +334,26 @@ export class CameraDelegate implements CameraStreamingDelegate {
     if (this.videoConfig.audio) {
       if (request.audio.codec === AudioStreamingCodecType.OPUS || request.audio.codec === AudioStreamingCodecType.AAC_ELD) {
         ffmpegArgs += // Audio
-          `${this.videoConfig.mapaudio ? ' -map ' + this.videoConfig.mapaudio : ' -vn -sn -dn'
-          } -codec:a libfdk_aac -profile:a aac_eld -flags +global_header -f null -ar ${request.audio.sample_rate
-          }k -b:a ${request.audio.max_bit_rate}k -ac ${request.audio.channel
-          } -payload_type ${request.audio.pt}`;
+          (this.videoConfig.mapaudio ? ' -map ' + this.videoConfig.mapaudio : ' -vn -sn -dn') +
+          (request.audio.codec === AudioStreamingCodecType.OPUS ?
+            ' -codec:a libopus' +
+            ' -application lowdelay' :
+            ' -codec:a libfdk_aac' +
+            ' -profile:a aac_eld') +
+          ' -flags +global_header' +
+          ' -f null' +
+          ' -ar ' + request.audio.sample_rate + 'k' +
+          ' -b:a ' + request.audio.max_bit_rate + 'k' +
+          ' -ac ' + request.audio.channel +
+          ' -payload_type ' + request.audio.pt;
 
         ffmpegArgs += // Audio Stream
-          ` -ssrc ${sessionInfo.audioSSRC
-          } -f rtp -srtp_out_suite AES_CM_128_HMAC_SHA1_80 -srtp_out_params ${sessionInfo.audioSRTP.toString('base64')
-          } srtp://${sessionInfo.address}:${sessionInfo.audioPort}?rtcpport=${sessionInfo.audioPort}&pkt_size=188`;
+          ' -ssrc ' + sessionInfo.audioSSRC +
+          ' -f rtp' +
+          ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80' +
+          ' -srtp_out_params ' + sessionInfo.audioSRTP.toString('base64') +
+          ' srtp://' + sessionInfo.address + ':' + sessionInfo.audioPort +
+          '?rtcpport=' + sessionInfo.audioPort + '&pkt_size=188';
       } else {
         this.log.error('Unsupported audio codec requested: ' + request.audio.codec, this.device.name);
       }
@@ -351,7 +377,7 @@ export class CameraDelegate implements CameraStreamingDelegate {
         this.log.info('Device appears to be inactive. Stopping stream.', this.device.name);
         this.controller.forceStopStreamingSession(request.sessionID);
         this.stopStream(request.sessionID);
-      }, request.video.rtcp_interval * 15 * 1000);
+      }, request.video.rtcp_interval * 5 * 1000);
     });
     activeSession.socket.bind(sessionInfo.videoReturnPort);
 
