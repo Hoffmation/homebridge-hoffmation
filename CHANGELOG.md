@@ -5,8 +5,9 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
-## **WORK IN PROGRESS**
+## 0.2.4 (2023-08-11)
 * (theimo1221) Temporarily revert to normal camera stream
+
 ## 0.2.3 (2023-08-11)
 * (theimo1221) Switch to rtsp
 
