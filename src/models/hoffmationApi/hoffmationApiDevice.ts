@@ -3,7 +3,7 @@ import { HoffmationApiDeviceInfo } from './HoffmationApiDeviceInfo';
 
 export class HoffmationApiDevice {
   public get videoUrl(): string {
-    return (this.rawData['h264IosStreamLink'] ?? this.rawData['mpegStreamLink']) as string ?? '';
+    return (this.rawData['rtspStreamLink']) as string ?? '';
   }
 
   public get snapshotUrl(): string {

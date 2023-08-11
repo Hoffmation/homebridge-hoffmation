@@ -56,12 +56,11 @@ export class CameraDelegate implements CameraStreamingDelegate {
     private readonly accessory: PlatformAccessory,
     private readonly device: HoffmationApiDevice,
   ) {
-    this.videoUrl = device.videoUrl.replace('/temp.m', '/temp.ts');
+    this.videoUrl = device.videoUrl;
     this.log = platform.log;
     this.ffmpegLog = new FfmpegLogger(this.log);
     this.log.debug(`Creating new CameraDelegate for ${this.device.name} with videoUrl ${this.videoUrl}`);
     this.videoConfig = {
-      // source: `-re -i ${this.videoUrl}`,
       source: `-rtsp_transport tcp -probesize 32 -analyzeduration 0 -re -i ${this.videoUrl}`,
       vcodec: 'copy',
       packetSize: 1600,
