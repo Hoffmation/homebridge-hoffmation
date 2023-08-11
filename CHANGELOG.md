@@ -7,6 +7,7 @@
 -->
 ## **WORK IN PROGRESS**
 * (theimo1221) Allow On/Off control of AC devices
+* (theimo1221) Optimize camera performance
 ## 0.2.1 (2023-08-10)
 
 * (theimo1221) Fix negative shutter positions

@@ -62,8 +62,9 @@ export class CameraDelegate implements CameraStreamingDelegate {
     this.log.debug(`Creating new CameraDelegate for ${this.device.name} with videoUrl ${this.videoUrl}`);
     this.videoConfig = {
       // source: `-re -i ${this.videoUrl}`,
-      source: `-i ${this.videoUrl}`,
+      source: `-rtsp_transport tcp -probesize 32 -analyzeduration 0 -re -i ${this.videoUrl}`,
       vcodec: 'copy',
+      packetSize: 1600,
     };
     this.videoProcessor = 'ffmpeg';
     platform.api.on(APIEvent.SHUTDOWN, () => {
@@ -288,10 +289,11 @@ export class CameraDelegate implements CameraStreamingDelegate {
 
     // this.log.debug('Video stream requested: ' + request.video.width + ' x ' + request.video.height + ', ' +
     //   request.video.fps + ' fps, ' + request.video.max_bit_rate + ' kbps', this.device.name, this.videoConfig.debug);
-    this.log.debug('Starting video stream: ' + (resolution.width > 0 ? resolution.width : 'native') + ' x ' +
-      (resolution.height > 0 ? resolution.height : 'native') + ', ' + (fps > 0 ? fps : 'native') +
-      ' fps, ' + (videoBitrate > 0 ? videoBitrate : '???') + ' kbps' +
-      (this.videoConfig.audio ? (' (' + request.audio.codec + ')') : ''), this.device.name);
+    this.log.debug(`Starting video stream: ${resolution.width > 0 ? resolution.width : 'native'} x ${
+      resolution.height > 0 ? resolution.height : 'native'
+    }, ${fps > 0 ? fps : 'native'} fps, ${
+      videoBitrate > 0 ? videoBitrate : '???'} kbps${
+      this.videoConfig.audio ? (' (' + request.audio.codec + ')') : ''}`, this.device.name);
 
     let ffmpegArgs = this.videoConfig.source!;
 
@@ -318,26 +320,15 @@ export class CameraDelegate implements CameraStreamingDelegate {
     if (this.videoConfig.audio) {
       if (request.audio.codec === AudioStreamingCodecType.OPUS || request.audio.codec === AudioStreamingCodecType.AAC_ELD) {
         ffmpegArgs += // Audio
-          (this.videoConfig.mapaudio ? ' -map ' + this.videoConfig.mapaudio : ' -vn -sn -dn') +
-          (request.audio.codec === AudioStreamingCodecType.OPUS ?
-            ' -codec:a libopus' +
-            ' -application lowdelay' :
-            ' -codec:a libfdk_aac' +
-            ' -profile:a aac_eld') +
-          ' -flags +global_header' +
-          ' -f null' +
-          ' -ar ' + request.audio.sample_rate + 'k' +
-          ' -b:a ' + request.audio.max_bit_rate + 'k' +
-          ' -ac ' + request.audio.channel +
-          ' -payload_type ' + request.audio.pt;
+          `${this.videoConfig.mapaudio ? ' -map ' + this.videoConfig.mapaudio : ' -vn -sn -dn'
+          } -codec:a libfdk_aac -profile:a aac_eld -flags +global_header -f null -ar ${request.audio.sample_rate
+          }k -b:a ${request.audio.max_bit_rate}k -ac ${request.audio.channel
+          } -payload_type ${request.audio.pt}`;
 
         ffmpegArgs += // Audio Stream
-          ' -ssrc ' + sessionInfo.audioSSRC +
-          ' -f rtp' +
-          ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80' +
-          ' -srtp_out_params ' + sessionInfo.audioSRTP.toString('base64') +
-          ' srtp://' + sessionInfo.address + ':' + sessionInfo.audioPort +
-          '?rtcpport=' + sessionInfo.audioPort + '&pkt_size=188';
+          ` -ssrc ${sessionInfo.audioSSRC
+          } -f rtp -srtp_out_suite AES_CM_128_HMAC_SHA1_80 -srtp_out_params ${sessionInfo.audioSRTP.toString('base64')
+          } srtp://${sessionInfo.address}:${sessionInfo.audioPort}?rtcpport=${sessionInfo.audioPort}&pkt_size=188`;
       } else {
         this.log.error('Unsupported audio codec requested: ' + request.audio.codec, this.device.name);
       }
@@ -361,7 +352,7 @@ export class CameraDelegate implements CameraStreamingDelegate {
         this.log.info('Device appears to be inactive. Stopping stream.', this.device.name);
         this.controller.forceStopStreamingSession(request.sessionID);
         this.stopStream(request.sessionID);
-      }, request.video.rtcp_interval * 5 * 1000);
+      }, request.video.rtcp_interval * 15 * 1000);
     });
     activeSession.socket.bind(sessionInfo.videoReturnPort);
 
