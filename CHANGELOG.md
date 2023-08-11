@@ -5,8 +5,7 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
-
-## **WORK IN PROGRESS**
+## 0.2.2 (2023-08-11)
 
 * (theimo1221) Allow On/Off control of AC devices
 * (theimo1221) Optimize camera performance
