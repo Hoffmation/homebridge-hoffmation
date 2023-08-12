@@ -27,6 +27,7 @@ import { FfmpegProcess } from './ffmpeg-process';
 import { FfmpegLogger } from './ffmpeg-logger';
 import { ExtendedResponse } from './ExtendedResponse';
 import { VideoConfig } from './VideoConfig';
+import { HoffmationConfig } from '../models/config';
 
 function getDurationSeconds(start: number) {
   return (Date.now() - start) / 1000;
@@ -56,9 +57,9 @@ export class CameraDelegate implements CameraStreamingDelegate {
     private readonly accessory: PlatformAccessory,
     private readonly device: HoffmationApiDevice,
   ) {
-    const useRtsp = false;
+    const useRtsp = (platform.config as HoffmationConfig).useRtspStream ?? false;
     if (useRtsp) {
-      this.videoUrl = `-rtsp_transport tcp -re -i ${device.rtspUrl}`;
+      this.videoUrl = `-i ${device.rtspUrl}`;
     } else {
       this.videoUrl = `-i ${device.h264IosStreamLink.replace('/temp.m', '/temp.ts')}`;
     }

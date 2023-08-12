@@ -5,10 +5,17 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
+
+## **WORK IN PROGRESS**
+
+* (theimo1221) Next RTSP try (with option to disable)
+
 ## 0.2.4 (2023-08-11)
+
 * (theimo1221) Temporarily revert to normal camera stream
 
 ## 0.2.3 (2023-08-11)
+
 * (theimo1221) Switch to rtsp
 
 ## 0.2.2 (2023-08-11)
