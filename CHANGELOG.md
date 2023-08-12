@@ -5,8 +5,7 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
-
-## **WORK IN PROGRESS**
+## 0.2.5 (2023-08-12)
 
 * (theimo1221) Next RTSP try (with option to disable)
 
