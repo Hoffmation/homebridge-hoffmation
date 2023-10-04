@@ -156,7 +156,10 @@ export class Hoffmation implements DynamicPlatformPlugin {
     if (device.deviceCapabilities.includes(DeviceCapability.lamp) && config.useLampDevices) {
       return true;
     }
-    if (device.deviceCapabilities.includes(DeviceCapability.motionSensor) && config.useMotionSensorDevices) {
+    if (device.deviceCapabilities.includes(DeviceCapability.motionSensor) &&
+      !device.deviceCapabilities.includes(DeviceCapability.camera) &&
+      config.useMotionSensorDevices
+    ) {
       return true;
     }
     if (device.deviceCapabilities.includes(DeviceCapability.scene) && config.useSceneDevices) {
