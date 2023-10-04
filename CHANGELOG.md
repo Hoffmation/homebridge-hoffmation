@@ -5,9 +5,10 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
-## **WORK IN PROGRESS**
+## 0.3.0 (2023-10-04)
 * (theimo1221) Update packages
 * (theimo1221) Allow setting, which devices should be included and which not.
+
 ## 0.2.5 (2023-08-12)
 
 * (theimo1221) Next RTSP try (with option to disable)
