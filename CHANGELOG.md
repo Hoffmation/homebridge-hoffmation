@@ -5,8 +5,9 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
-## **WORK IN PROGRESS**
+## 0.3.1 (2023-10-04)
 * (theimo1221) Don't treat cameras as motion sensors
+
 ## 0.3.0 (2023-10-04)
 * (theimo1221) Update packages
 * (theimo1221) Allow setting, which devices should be included and which not.
