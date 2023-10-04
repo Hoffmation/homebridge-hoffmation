@@ -19,7 +19,7 @@ export class Hoffmation implements DynamicPlatformPlugin {
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];
   private readonly _api: HoffmationApi;
-  private devicesDict: { [id: string] : HoffmationDevice } = {};
+  private devicesDict: { [id: string]: HoffmationDevice } = {};
 
   constructor(
     public readonly log: Logging,
@@ -61,7 +61,7 @@ export class Hoffmation implements DynamicPlatformPlugin {
     this._api.getDevices().catch((err) => {
       this.log.error('Failed to get devices', err);
     }).then((devices) => {
-      if(!devices) {
+      if (!devices) {
         this.log.error('No devices found');
         return;
       }
@@ -74,7 +74,7 @@ export class Hoffmation implements DynamicPlatformPlugin {
 
   private async updateAllDevices(): Promise<void> {
     const devices = await this._api.getDevices();
-    if(!devices || devices.length === 0) {
+    if (!devices || devices.length === 0) {
       this.log.error('No devices found');
       return;
     }
@@ -86,19 +86,10 @@ export class Hoffmation implements DynamicPlatformPlugin {
   private processDevices(devices: HoffmationApiDevice[]): void {
     // loop over the discovered devices and register each one if it has not already been registered
     const usedIds: string[] = [];
+
     for (const device of devices) {
       this.log.debug(`Processing ${device.id} with capabilities ${device.deviceCapabilities}`);
-      if(
-        !device.deviceCapabilities.includes(DeviceCapability.ac) &&
-        !device.deviceCapabilities.includes(DeviceCapability.camera) &&
-        !device.deviceCapabilities.includes(DeviceCapability.dimmablelamp) &&
-        !device.deviceCapabilities.includes(DeviceCapability.lamp) &&
-        !device.deviceCapabilities.includes(DeviceCapability.actuator) &&
-        !device.deviceCapabilities.includes(DeviceCapability.scene) &&
-        !device.deviceCapabilities.includes(DeviceCapability.temperatureSensor) &&
-        !device.deviceCapabilities.includes(DeviceCapability.shutter) &&
-        !device.deviceCapabilities.includes(DeviceCapability.motionSensor)
-      ) {
+      if (!this.shouldIncludeDevice(device)) {
         continue;
       }
       // generate a unique id for the accessory this should be generated from
@@ -138,7 +129,7 @@ export class Hoffmation implements DynamicPlatformPlugin {
       this.devicesDict[device.id] = new HoffmationDevice(this, accessory, device, this._api);
 
       // link the accessory to your platform
-      if(device.deviceCapabilities.includes(DeviceCapability.camera)) {
+      if (device.deviceCapabilities.includes(DeviceCapability.camera)) {
         this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
       } else {
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
@@ -149,5 +140,34 @@ export class Hoffmation implements DynamicPlatformPlugin {
       PLUGIN_NAME,
       PLATFORM_NAME,
       this.accessories.filter((accessory) => !usedIds.includes(accessory.UUID)));
+  }
+
+  private shouldIncludeDevice(device: HoffmationApiDevice): boolean {
+    const config = this.config as HoffmationConfig;
+    if (device.deviceCapabilities.includes(DeviceCapability.ac) && config.useAcDevices) {
+      return true;
+    }
+    if (device.deviceCapabilities.includes(DeviceCapability.actuator) && config.useActuatorDevices) {
+      return true;
+    }
+    if (device.deviceCapabilities.includes(DeviceCapability.camera) && config.useCameraDevices) {
+      return true;
+    }
+    if (device.deviceCapabilities.includes(DeviceCapability.lamp) && config.useLampDevices) {
+      return true;
+    }
+    if (device.deviceCapabilities.includes(DeviceCapability.motionSensor) && config.useMotionSensorDevices) {
+      return true;
+    }
+    if (device.deviceCapabilities.includes(DeviceCapability.scene) && config.useSceneDevices) {
+      return true;
+    }
+    if (device.deviceCapabilities.includes(DeviceCapability.shutter) && config.useShutterDevices) {
+      return true;
+    }
+    if (device.deviceCapabilities.includes(DeviceCapability.temperatureSensor) && config.useTemperatureDevices) {
+      return true;
+    }
+    return false;
   }
 }

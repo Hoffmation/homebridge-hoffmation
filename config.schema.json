@@ -22,6 +22,54 @@
         "type": "boolean",
         "required": true,
         "default": true
+      },
+      "useAcDevices": {
+        "title": "Allow controlling/monitoring of AC devices",
+        "type": "boolean",
+        "required": true,
+        "default": true
+      },
+      "useCameraDevices": {
+        "title": "Allow controlling/monitoring of Camera devices",
+        "type": "boolean",
+        "required": true,
+        "default": true
+      },
+      "useLampDevices": {
+        "title": "Allow controlling/monitoring of Lamp devices",
+        "type": "boolean",
+        "required": true,
+        "default": true
+      },
+      "useActuatorDevices": {
+        "title": "Allow controlling/monitoring of Actuator devices",
+        "type": "boolean",
+        "required": true,
+        "default": true
+      },
+      "useSceneDevices": {
+        "title": "Allow controlling/monitoring of Scene devices",
+        "type": "boolean",
+        "required": true,
+        "default": true
+      },
+      "useTemperatureDevices": {
+        "title": "Allow controlling/monitoring of Temperature devices",
+        "type": "boolean",
+        "required": true,
+        "default": true
+      },
+      "useShutterDevices": {
+        "title": "Allow controlling/monitoring of Shutter devices",
+        "type": "boolean",
+        "required": true,
+        "default": true
+      },
+      "useMotionSensorDevices": {
+        "title": "Allow monitoring of Motions Sensor devices",
+        "type": "boolean",
+        "required": true,
+        "default": true
       }
     }
   }
