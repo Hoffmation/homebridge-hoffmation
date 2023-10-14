@@ -344,7 +344,7 @@ export class HoffmationDevice {
   }
 
   async getGarageDoorCurrentState(): Promise<CharacteristicValue> {
-    if (!this.device.deviceCapabilities.includes(DeviceCapability.shutter)) {
+    if (!this.device.deviceCapabilities.includes(DeviceCapability.garageDoorOpener)) {
       return CurrentDoorState.STOPPED;
     }
     if (this.cachedDevice !== undefined) {
@@ -359,8 +359,8 @@ export class HoffmationDevice {
   }
 
   async getGarageDoorTargetState(): Promise<CharacteristicValue> {
-    if (!this.device.deviceCapabilities.includes(DeviceCapability.shutter)) {
-      return CurrentDoorState.STOPPED;
+    if (!this.device.deviceCapabilities.includes(DeviceCapability.garageDoorOpener)) {
+      return CurrentDoorState.OPEN;
     }
     if (this.cachedDevice !== undefined) {
       return this.cachedDevice.targetGarageDoorState;
@@ -368,7 +368,7 @@ export class HoffmationDevice {
 
     const update = await this.updateSelf();
     if (!update) {
-      return CurrentDoorState.STOPPED;
+      return CurrentDoorState.OPEN;
     }
     return this.getGarageDoorTargetState();
   }

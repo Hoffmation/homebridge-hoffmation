@@ -5,6 +5,8 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
+## **WORK IN PROGRESS**
+* (theimo1221) Minor fixes for garage door opener
 ## 0.3.4 (2023-10-14)
 * (theimo1221) Extend logging and add dependency
 
