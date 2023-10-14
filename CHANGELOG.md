@@ -5,8 +5,9 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
-## **WORK IN PROGRESS**
+## 0.3.2 (2023-10-14)
 * (theimo1221) Add GarageDoor Opener
+
 ## 0.3.1 (2023-10-04)
 * (theimo1221) Don't treat cameras as motion sensors
 
