@@ -1,7 +1,7 @@
 import * as http from 'http';
 import { HoffmationConfig } from './models/config';
 import { HoffmationApiDevice } from './models/hoffmationApi/hoffmationApiDevice';
-import { Logger } from 'homebridge';
+import { Characteristic, Logger } from 'homebridge';
 
 export class HoffmationApi {
   private readonly serverAddress: string;
@@ -60,6 +60,12 @@ export class HoffmationApi {
     const result =
       await HoffmationApi.performGetStringRequest(`${this.serverAddress}/dimmer/${id}/${state}/${desiredBrightness}`);
     this.log.debug(`Set Brightness ${id} to ${desiredBrightness} with result ${result}`);
+    return result;
+  }
+
+  public async setGarageDoor(id: string, open: boolean): Promise<string> {
+    const result = await HoffmationApi.performGetStringRequest(`${this.serverAddress}/garageDoor/${id}/${open}`);
+    this.log.debug(`Set Garage Door ${id} to ${open ? 'open' : 'closed'} with result ${result}`);
     return result;
   }
 

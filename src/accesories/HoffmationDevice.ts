@@ -5,6 +5,7 @@ import { HoffmationApi } from '../api';
 import { DeviceCapability } from 'hoffmation-base/lib/server/devices/DeviceCapability';
 import { HoffmationApiDevice } from '../models/hoffmationApi/hoffmationApiDevice';
 import { CameraDelegate } from '../CameraHandling/CameraDelegate';
+import { CurrentDoorState } from 'hap-nodejs/dist/lib/definitions/CharacteristicDefinitions';
 
 /**
  * Platform Accessory
@@ -20,6 +21,7 @@ export class HoffmationDevice {
   private temperatureService: Service | undefined;
   private cachedDevice: HoffmationApiDevice | undefined;
   private acService: Service | undefined;
+  private garageDoorService: Service | undefined;
 
   constructor(
     private readonly platform: Hoffmation,
@@ -79,6 +81,20 @@ export class HoffmationDevice {
       this.shutterService.getCharacteristic(this.platform.Characteristic.TargetPosition)
         .onSet(this.setShutterTargetPos.bind(this))
         .onGet(this.getShutterCurrentPos.bind(this));
+    }
+    if (caps.includes(DeviceCapability.garageDoorOpener)) {
+      this.garageDoorService = this.accessory.getService(this.platform.Service.GarageDoorOpener) ||
+        this.accessory.addService(this.platform.Service.GarageDoorOpener);
+
+      this.garageDoorService.getCharacteristic(this.platform.Characteristic.CurrentDoorState)
+        .onGet(this.getGarageDoorCurrentState.bind(this));
+
+      this.garageDoorService.getCharacteristic(this.platform.Characteristic.TargetDoorState)
+        .onSet(this.setGarageDoorTargetState.bind(this))
+        .onGet(this.getGarageDoorTargetState.bind(this));
+
+      this.garageDoorService.getCharacteristic(this.platform.Characteristic.ObstructionDetected)
+        .onGet(() => false);
     }
     if (caps.includes(DeviceCapability.motionSensor)) {
       this.motionService = this.accessory.getService(this.platform.Service.MotionSensor) ||
@@ -144,6 +160,10 @@ export class HoffmationDevice {
     if (caps.includes(DeviceCapability.shutter)) {
       this.shutterService?.updateCharacteristic(this.platform.Characteristic.CurrentPosition, data.currentShutterPosition);
     }
+    if (caps.includes(DeviceCapability.garageDoorOpener)) {
+      this.garageDoorService?.updateCharacteristic(this.platform.Characteristic.CurrentDoorState, data.currentGarageDoorState);
+      this.garageDoorService?.updateCharacteristic(this.platform.Characteristic.TargetDoorState, data.targetGarageDoorState);
+    }
     if (caps.includes(DeviceCapability.scene)) {
       this.sceneService?.updateCharacteristic(this.platform.Characteristic.On, data.sceneOn ?? false);
     }
@@ -186,6 +206,12 @@ export class HoffmationDevice {
     const boolValue = value as number === 1;
     this.platform.log.info('Set Ac On ->', boolValue);
     await this.api.setAcOn(this.device.id, boolValue);
+    await this.updateSelf();
+  }
+
+  async setGarageDoorTargetState(value: CharacteristicValue) {
+    this.platform.log.info('setGarageDoorTargetState ->', value);
+    await this.api.setGarageDoor(this.device.id, (value as number) === 0);
     await this.updateSelf();
   }
 
@@ -315,6 +341,36 @@ export class HoffmationDevice {
       return 0;
     }
     return this.getShutterCurrentPos();
+  }
+
+  async getGarageDoorCurrentState(): Promise<CharacteristicValue> {
+    if (!this.device.deviceCapabilities.includes(DeviceCapability.shutter)) {
+      return CurrentDoorState.STOPPED;
+    }
+    if (this.cachedDevice !== undefined) {
+      return this.cachedDevice.currentGarageDoorState;
+    }
+
+    const update = await this.updateSelf();
+    if (!update) {
+      return CurrentDoorState.STOPPED;
+    }
+    return this.getGarageDoorCurrentState();
+  }
+
+  async getGarageDoorTargetState(): Promise<CharacteristicValue> {
+    if (!this.device.deviceCapabilities.includes(DeviceCapability.shutter)) {
+      return CurrentDoorState.STOPPED;
+    }
+    if (this.cachedDevice !== undefined) {
+      return this.cachedDevice.targetGarageDoorState;
+    }
+
+    const update = await this.updateSelf();
+    if (!update) {
+      return CurrentDoorState.STOPPED;
+    }
+    return this.getGarageDoorTargetState();
   }
 
   async getAcTemp(): Promise<CharacteristicValue> {

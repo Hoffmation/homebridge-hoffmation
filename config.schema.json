@@ -35,6 +35,12 @@
         "required": true,
         "default": true
       },
+      "useGarageDoorDevices": {
+        "title": "Allow controlling/monitoring of Garage Door Opener devices",
+        "type": "boolean",
+        "required": true,
+        "default": false
+      },
       "useLampDevices": {
         "title": "Allow controlling/monitoring of Lamp devices",
         "type": "boolean",

@@ -1,5 +1,6 @@
 import { DeviceCapability } from 'hoffmation-base/lib/server/devices/DeviceCapability';
 import { HoffmationApiDeviceInfo } from './HoffmationApiDeviceInfo';
+import { CurrentDoorState, TargetDoorState } from 'hap-nodejs/dist/lib/definitions/CharacteristicDefinitions';
 
 export class HoffmationApiDevice {
   public get rtspUrl(): string {
@@ -33,6 +34,24 @@ export class HoffmationApiDevice {
 
   public get currentShutterPosition(): number {
     return Math.max(Math.min((this.rawData['_currentLevel']) as number ?? 0, 100), 0);
+  }
+
+
+  public get targetGarageDoorState(): number {
+    const isClosed = this.rawData['_switchState'] as boolean | undefined;
+    if (isClosed === undefined) {
+      return TargetDoorState.OPEN;
+    }
+    return isClosed ? TargetDoorState.CLOSED : TargetDoorState.OPEN;
+  }
+
+
+  public get currentGarageDoorState(): number {
+    const isClosed = this.rawData['_isClosed'] as boolean | undefined;
+    if (isClosed === undefined) {
+      return CurrentDoorState.STOPPED;
+    }
+    return isClosed ? CurrentDoorState.CLOSED : CurrentDoorState.OPEN;
   }
 
 
