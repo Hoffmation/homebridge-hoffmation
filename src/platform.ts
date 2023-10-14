@@ -59,7 +59,7 @@ export class Hoffmation implements DynamicPlatformPlugin {
   discoverDevices() {
 
     this._api.getDevices().catch((err) => {
-      this.log.error('Failed to get devices', err);
+      this.log.error(`Failed to get devices from server-address ${this._api.serverAddress}`, err);
     }).then((devices) => {
       if (!devices) {
         this.log.error('No devices found');

@@ -4,7 +4,7 @@ import { HoffmationApiDevice } from './models/hoffmationApi/hoffmationApiDevice'
 import { Logger } from 'homebridge';
 
 export class HoffmationApi {
-  private readonly serverAddress: string;
+  public readonly serverAddress: string;
 
   public constructor(
     config: HoffmationConfig,

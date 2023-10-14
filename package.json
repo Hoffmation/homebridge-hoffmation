@@ -22,7 +22,7 @@
     "lint-check-all": "eslint ./**/{*.js,*.ts,*.test.ts} --no-error-on-unmatched-pattern",
     "lint-fix-all": "eslint ./**/{*.ts,*.test.ts} --fix --no-error-on-unmatched-pattern",
     "watch": "npm run build && npm link && nodemon",
-    "build": "rimraf ./dist && tsc",
+    "build": "npm run lint && rimraf ./dist && tsc",
     "prepare": "npm run build",
     "prepublishOnly": "npm run lint && npm run build",
     "pre-release-check": "npm run build",
@@ -38,7 +38,8 @@
   "dependencies": {
     "hoffmation-base": "2.17.1",
     "got": "^11.8.5",
-    "pick-port": "^1.0.1"
+    "pick-port": "^1.0.1",
+    "hap-nodejs": "^0.11.1"
   },
   "devDependencies": {
     "@alcalzone/release-script": "^3.6.0",
