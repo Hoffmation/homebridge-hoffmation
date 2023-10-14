@@ -1,7 +1,7 @@
 import * as http from 'http';
 import { HoffmationConfig } from './models/config';
 import { HoffmationApiDevice } from './models/hoffmationApi/hoffmationApiDevice';
-import { Characteristic, Logger } from 'homebridge';
+import { Logger } from 'homebridge';
 
 export class HoffmationApi {
   private readonly serverAddress: string;
