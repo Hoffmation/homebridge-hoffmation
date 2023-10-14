@@ -5,8 +5,9 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
-## **WORK IN PROGRESS**
+## 0.3.3 (2023-10-14)
 * (theimo1221) Update packages
+
 ## 0.3.2 (2023-10-14)
 * (theimo1221) Add GarageDoor Opener
 
