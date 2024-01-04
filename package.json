@@ -37,7 +37,7 @@
   ],
   "dependencies": {
     "hoffmation-base": "2.22.8",
-    "got": "^12.6.1",
+    "got": "^11.8.6",
     "pick-port": "^1.0.1",
     "hap-nodejs": "^0.11.1"
   },
