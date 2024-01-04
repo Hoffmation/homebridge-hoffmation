@@ -466,13 +466,13 @@ export class CameraDelegate implements CameraStreamingDelegate {
   }
 
   private async getSnapshot(): Promise<Buffer> {
-    const response = await this.request<Buffer>({
-      url: this.device.snapshotUrl + `&fn=${this.fn++}`,
-      responseType: 'buffer',
-      headers: {
-        accept: 'image/jpeg',
-      },
-    });
+    const options: RequestOptions = new RequestOptions();
+    options.url = this.device.snapshotUrl + `&fn=${this.fn++}`;
+    options.responseType = 'buffer';
+    options.headers = {
+      accept: 'image/jpeg',
+    };
+    const response = await this.request<Buffer>(options);
     const {responseTimestamp, timeMillis} = response;
     const timestampAge = Math.abs(responseTimestamp - timeMillis);
 
@@ -482,12 +482,12 @@ export class CameraDelegate implements CameraStreamingDelegate {
   }
 
   private async request<T>(requestOptions: RequestOptions): Promise<T & ExtendedResponse> {
-    const defaultRequestOptions: RequestOptions = {
-      responseType: 'json',
-      method: 'GET',
-      retry: 0,
-      timeout: 20000,
-    };
+    const defaultRequestOptions: RequestOptions = new RequestOptions();
+    defaultRequestOptions.responseType = 'json';
+    defaultRequestOptions.method = 'GET';
+    defaultRequestOptions.retry = {limit: 0};
+    defaultRequestOptions.timeout = {request: 20000};
+
     const options = {
       ...defaultRequestOptions,
       ...requestOptions,
