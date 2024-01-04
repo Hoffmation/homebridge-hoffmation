@@ -56,8 +56,12 @@ export class HoffmationApiDevice {
 
 
   public get actuatorOn(): boolean | undefined {
-    return (this.rawData['_actuatorOn'] ??
-      this.rawData['actuatorOn']) as boolean | undefined;
+    return (
+      this.rawData['_actuatorOn'] ??
+      this.rawData['actuatorOn'] ??
+      this.rawData['_on'] ??
+      this.rawData['on']
+    ) as boolean | undefined;
   }
 
   public get acOn(): boolean | undefined {

@@ -7,6 +7,7 @@
 -->
 ## **WORK IN PROGRESS**
 * (theimo1221) Update packages
+* (theimo1221) Minor Correction for "on" state of some lamps/actors
 ## 0.3.5 (2023-10-14)
 * (theimo1221) Minor fixes for garage door opener
 
