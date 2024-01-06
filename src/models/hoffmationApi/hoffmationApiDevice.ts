@@ -76,9 +76,9 @@ export class HoffmationApiDevice {
   }
 
 
-  public get brightness(): boolean | undefined {
+  public get brightness(): number | undefined {
     return (this.rawData['brightness'] ??
-      this.rawData['_brightness']) as boolean | undefined;
+      this.rawData['_brightness']) as number | undefined;
   }
 
 

@@ -303,7 +303,7 @@ export class HoffmationDevice {
       return false;
     }
     if (this.cachedDevice !== undefined) {
-      return this.cachedDevice.brightness ?? 0;
+      return Math.min(Math.max(0, this.cachedDevice.brightness ?? 0), 100);
     }
 
     const update = await this.updateSelf();

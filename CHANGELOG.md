@@ -5,6 +5,8 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
+## **WORK IN PROGRESS**
+* (theimo1221) Fix for negative Brightness values
 ## 0.4.1 (2024-01-04)
 * (theimo1221) Revert to got 11.8.6
 
