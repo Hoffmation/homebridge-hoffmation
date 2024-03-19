@@ -22,6 +22,13 @@ export class HoffmationDevice {
   private cachedDevice: HoffmationApiDevice | undefined;
   private acService: Service | undefined;
   private garageDoorService: Service | undefined;
+  /**
+   * Last time setBrightness was called, as apple calls both set on and set brightness when changing brightness,
+   * so we need to ignore the first call to setOn (in case the setBrightness call fires as well)
+   * @type {number}
+   * @private
+   */
+  private lastSetBrightnessCall: number = 0;
 
   constructor(
     private readonly platform: Hoffmation,
@@ -186,13 +193,16 @@ export class HoffmationDevice {
 
   async setBrightness(value: CharacteristicValue) {
     this.platform.log.info('setBrightness ->', value);
+    this.lastSetBrightnessCall = Date.now();
     await this.api.setBrightness(this.device.id, value as number);
     await this.updateSelf();
   }
 
   async setOn(value: CharacteristicValue) {
     this.platform.log.info('Set Characteristic On ->', value);
-    if (this.device.deviceCapabilities.includes(DeviceCapability.lamp)) {
+    if (this.device.deviceCapabilities.includes(DeviceCapability.dimmablelamp)) {
+      await this.delayedSetOn(value as boolean);
+    } else if (this.device.deviceCapabilities.includes(DeviceCapability.lamp)) {
       await this.api.setLamp(this.device.id, value as boolean);
     } else if (this.device.deviceCapabilities.includes(DeviceCapability.actuator)) {
       await this.api.setActuator(this.device.id, value as boolean);
@@ -403,4 +413,14 @@ export class HoffmationDevice {
     return this.getTemperature();
   }
 
+  async delayedSetOn(value: boolean): Promise<void> {
+    setTimeout(() => {
+      if (Date.now() - this.lastSetBrightnessCall < 200) {
+        return;
+      }
+      this.api.setLamp(this.device.id, value);
+    },
+    200,
+    );
+  }
 }

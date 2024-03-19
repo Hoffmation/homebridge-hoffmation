@@ -5,32 +5,46 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
+
+## **WORK IN PROGRESS**
+
+* (theimo1221) Prevent duplicate api-calls for dimmer changes
+
 ## 0.4.2 (2024-01-06)
+
 * (theimo1221) Fix for negative Brightness values
 
 ## 0.4.1 (2024-01-04)
+
 * (theimo1221) Revert to got 11.8.6
 
 ## 0.4.0 (2024-01-04)
+
 * (theimo1221) Update packages
 * (theimo1221) Minor Correction for "on" state of some lamps/actors
 
 ## 0.3.5 (2023-10-14)
+
 * (theimo1221) Minor fixes for garage door opener
 
 ## 0.3.4 (2023-10-14)
+
 * (theimo1221) Extend logging and add dependency
 
 ## 0.3.3 (2023-10-14)
+
 * (theimo1221) Update packages
 
 ## 0.3.2 (2023-10-14)
+
 * (theimo1221) Add GarageDoor Opener
 
 ## 0.3.1 (2023-10-04)
+
 * (theimo1221) Don't treat cameras as motion sensors
 
 ## 0.3.0 (2023-10-04)
+
 * (theimo1221) Update packages
 * (theimo1221) Allow setting, which devices should be included and which not.
 
