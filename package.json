@@ -36,21 +36,21 @@
     "homebridge-plugin"
   ],
   "dependencies": {
-    "hoffmation-base": "2.22.8",
+    "hoffmation-base": "3.0.0-alpha.17",
     "got": "^11.8.6",
     "pick-port": "^1.0.1",
-    "hap-nodejs": "^0.11.1"
+    "hap-nodejs": "^0.11.2"
   },
   "devDependencies": {
     "@alcalzone/release-script": "^3.7.0",
-    "@types/node": "^20.10.6",
-    "@typescript-eslint/eslint-plugin": "^6.17.0",
-    "@typescript-eslint/parser": "^6.17.0",
-    "eslint": "^8.56.0",
+    "@types/node": "^20.11.30",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.57.0",
     "homebridge": "^1.7.0",
-    "nodemon": "^3.0.2",
+    "nodemon": "^3.1.0",
     "rimraf": "^5.0.5",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
+    "typescript": "5.3.3"
   }
 }

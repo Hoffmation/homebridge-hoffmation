@@ -9,6 +9,7 @@
 ## **WORK IN PROGRESS**
 
 * (theimo1221) Prevent duplicate api-calls for dimmer changes
+* (theimo1221) Update packages
 
 ## 0.4.2 (2024-01-06)
 
