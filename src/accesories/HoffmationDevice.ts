@@ -414,8 +414,17 @@ export class HoffmationDevice {
   }
 
   async delayedSetOn(value: boolean): Promise<void> {
+    if (value === false) {
+      this.api.setLamp(this.device.id, value);
+      return;
+    }
+    if(Date.now() - this.lastSetBrightnessCall < 200) {
+      this.platform.log('Ignoring setOn call as it was called within 200ms of setBrightness');
+      return;
+    }
     setTimeout(() => {
       if (Date.now() - this.lastSetBrightnessCall < 200) {
+        this.platform.log('Ignoring setOn call as it was called within 200ms of setBrightness');
         return;
       }
       this.api.setLamp(this.device.id, value);
