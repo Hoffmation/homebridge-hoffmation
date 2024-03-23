@@ -5,6 +5,8 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
+## **WORK IN PROGRESS**
+* (theimo1221) Add user-agent to requests
 ## 0.4.4 (2024-03-20)
 * (theimo1221) Prevent duplicate api-calls for dimmer changes
 

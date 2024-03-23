@@ -91,8 +91,13 @@ export class HoffmationApi {
   }
 
   public static performGetStringRequest(url: string): Promise<string> {
+    const reqOptions: http.RequestOptions = {
+      headers: {
+        'user-agent': 'homebridge-hoffmation',
+      },
+    };
     return new Promise<string>((resolve, reject) => {
-      http.get(url, (res) => {
+      http.get(url, reqOptions, (res) => {
         const {statusCode} = res;
 
         if (statusCode !== 200) {
