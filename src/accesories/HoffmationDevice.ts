@@ -206,14 +206,17 @@ export class HoffmationDevice {
   }
 
   async setOn(value: CharacteristicValue) {
-    this.platform.log.info('Set Characteristic On ->', value);
     if (this.device.deviceCapabilities.includes(DeviceCapability.dimmablelamp)) {
+      this.platform.log.info(`Set Characteristic On for dimmableLamp ${this.device.id} ->`, value);
       await this.delayedSetOn(value as boolean);
     } else if (this.device.deviceCapabilities.includes(DeviceCapability.lamp)) {
+      this.platform.log.info(`Set Characteristic On for lamp ${this.device.id} ->`, value);
       await this.api.setLamp(this.device.id, value as boolean);
     } else if (this.device.deviceCapabilities.includes(DeviceCapability.actuator)) {
+      this.platform.log.info(`Set Characteristic On for actuator ${this.device.id} ->`, value);
       await this.api.setActuator(this.device.id, value as boolean);
     } else if (this.device.deviceCapabilities.includes(DeviceCapability.scene)) {
+      this.platform.log.info(`Set Characteristic On for scene ${this.device.id} ->`, value);
       await this.api.setScene(this.device.id, value as boolean);
     }
     await this.updateSelf();
@@ -426,12 +429,12 @@ export class HoffmationDevice {
       return;
     }
     if(Date.now() - this.lastSetBrightnessCall < 400) {
-      this.platform.log('Ignoring setOn call as it was called within 400ms of setBrightness');
+      this.platform.log('Ignoring setOn call as it was called less than 400ms after setBrightness');
       return;
     }
     setTimeout(() => {
-      if (Date.now() - this.lastSetBrightnessCall < 400) {
-        this.platform.log('Ignoring setOn call as it was called within 400ms of setBrightness');
+      if (Date.now() - this.lastSetBrightnessCall < 500) {
+        this.platform.log('Ignoring setOn call as within 400ms of this setBrightness got called');
         return;
       }
       this.api.setLamp(this.device.id, value);
