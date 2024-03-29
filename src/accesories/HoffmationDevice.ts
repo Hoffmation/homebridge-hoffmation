@@ -193,9 +193,16 @@ export class HoffmationDevice {
 
   async setBrightness(value: CharacteristicValue) {
     this.platform.log.info('setBrightness ->', value);
-    this.lastSetBrightnessCall = Date.now();
-    await this.api.setBrightness(this.device.id, value as number);
-    await this.updateSelf();
+    const thisDate: number = Date.now();
+    this.lastSetBrightnessCall = thisDate;
+    setTimeout(async () => {
+      if(thisDate !== this.lastSetBrightnessCall) {
+        // Es gab in der Zwischenzeit einen weiteren Aufruf von setBrightness
+        return;
+      }
+      await this.api.setBrightness(this.device.id, value as number);
+      await this.updateSelf();
+    }, 250);
   }
 
   async setOn(value: CharacteristicValue) {
