@@ -5,8 +5,9 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
-## **WORK IN PROGRESS**
+## 0.4.6 (2024-03-29)
 * (theimo1221) Prevent double setting the dimmer (e.g. when using the slider)
+
 ## 0.4.5 (2024-03-23)
 * (theimo1221) Add user-agent to requests
 
