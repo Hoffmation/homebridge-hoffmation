@@ -28,6 +28,7 @@ import { FfmpegLogger } from './ffmpeg-logger';
 import { ExtendedResponse } from './ExtendedResponse';
 import { VideoConfig } from './VideoConfig';
 import { HoffmationConfig } from '../models/config';
+import { HoffmationApi } from '../api';
 
 function getDurationSeconds(start: number) {
   return (Date.now() - start) / 1000;
@@ -56,6 +57,7 @@ export class CameraDelegate implements CameraStreamingDelegate {
     private readonly platform: Hoffmation,
     private readonly accessory: PlatformAccessory,
     private readonly device: HoffmationApiDevice,
+    private readonly api: HoffmationApi,
   ) {
     const useRtsp = (platform.config as HoffmationConfig).useRtspStream ?? false;
     if (useRtsp) {
@@ -466,13 +468,19 @@ export class CameraDelegate implements CameraStreamingDelegate {
   }
 
   private async getSnapshot(): Promise<Buffer> {
-    const response = await this.request<Buffer>({
-      url: this.device.snapshotUrl + `&fn=${this.fn++}`,
-      responseType: 'buffer',
-      headers: {
-        accept: 'image/jpeg',
-      },
-    });
+    let response;
+    if(this.device.lastMotionTimestamp + 35000 > Date.now()) {
+      response = await this.api.getCameraLastMotionImage(this.device.id);
+    } else {
+      response = await this.request<Buffer>({
+        url: this.device.snapshotUrl + `&fn=${this.fn++}`,
+        responseType: 'buffer',
+        headers: {
+          accept: 'image/jpeg',
+        },
+      });
+    }
+
     const {responseTimestamp, timeMillis} = response;
     const timestampAge = Math.abs(responseTimestamp - timeMillis);
 

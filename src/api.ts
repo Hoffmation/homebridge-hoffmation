@@ -113,4 +113,9 @@ export class HoffmationApi {
       });
     });
   }
+
+  public async getCameraLastMotionImage(id: string): Promise<Buffer> {
+    const result = await HoffmationApi.performGetStringRequest(`${this.serverAddress}/camera/${id}/lastMotionImage`);
+    return Buffer.from(result, 'base64');
+  }
 }

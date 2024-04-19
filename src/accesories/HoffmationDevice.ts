@@ -120,7 +120,7 @@ export class HoffmationDevice {
         .onGet(this.getTemperature.bind(this));
     }
     if (caps.includes(DeviceCapability.camera)) {
-      const delegate = new CameraDelegate(this.platform, accessory, this.device);
+      const delegate = new CameraDelegate(this.platform, accessory, this.device, api);
       accessory.configureController(
         delegate.controller,
       );

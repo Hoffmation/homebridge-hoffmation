@@ -27,6 +27,10 @@ export class HoffmationApiDevice {
     return this.info.allDevicesKey ?? this.info.fullID ?? this.info.fullName;
   }
 
+  public get lastMotionTimestamp(): number {
+    return (this.rawData['_lastMotion']) as number ?? 0;
+  }
+
   public get name(): string {
     return this.info._customName ?? this.info.fullName;
   }
