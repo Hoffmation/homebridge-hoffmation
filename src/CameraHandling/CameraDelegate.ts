@@ -8,6 +8,7 @@ import {
   PrepareStreamCallback,
   PrepareStreamRequest,
   PrepareStreamResponse,
+  ResourceRequestReason,
   SnapshotRequest,
   SnapshotRequestCallback,
   SRTPCryptoSuites,
@@ -56,7 +57,7 @@ export class CameraDelegate implements CameraStreamingDelegate {
   constructor(
     private readonly platform: Hoffmation,
     private readonly accessory: PlatformAccessory,
-    private readonly device: HoffmationApiDevice,
+    private device: HoffmationApiDevice,
     private readonly api: HoffmationApi,
   ) {
     const useRtsp = (platform.config as HoffmationConfig).useRtspStream ?? false;
@@ -125,6 +126,10 @@ export class CameraDelegate implements CameraStreamingDelegate {
     });
   }
 
+  public updateDeviceData(data: HoffmationApiDevice) {
+    this.device = data;
+  }
+
   private cachedSnapshot?: Buffer;
 
   private previousLoadSnapshotPromise?: Promise<Buffer | undefined>;
@@ -184,10 +189,10 @@ export class CameraDelegate implements CameraStreamingDelegate {
     }
   }
 
-  private async getCurrentSnapshot() {
+  private async getCurrentSnapshot(ignoreCache: boolean = false) {
     // this.log.debug(`${this.cachedSnapshot ? 'Used cached snapshot' : 'No snapshot cached'} for ${this.device.name}`);
 
-    if (!this.hasSnapshotWithinLifetime) {
+    if (ignoreCache || !this.hasSnapshotWithinLifetime) {
       return await this.loadSnapshot().catch(this.log.error);
     }
 
@@ -201,7 +206,7 @@ export class CameraDelegate implements CameraStreamingDelegate {
   ) {
     try {
       // this.log.debug(`Snapshot requested for ${this.device.name}`);
-      const snapshot = await this.getCurrentSnapshot();
+      const snapshot = await this.getCurrentSnapshot(request.reason === ResourceRequestReason.EVENT);
 
       if (!snapshot) {
         // return an error to prevent "empty image buffer" warnings
@@ -469,10 +474,12 @@ export class CameraDelegate implements CameraStreamingDelegate {
 
   private async getSnapshot(): Promise<Buffer> {
     let response;
-    if(this.device.lastMotionTimestamp + 35000 > Date.now()) {
+    const timeSinceLastDetectedMotion = Date.now() - this.device.lastMotionTimestamp;
+    if(timeSinceLastDetectedMotion < 60000) {
       this.platform.log(`Camera ${this.device.name} has motion detected, fetching last motion image.`)
       response = await this.api.getCameraLastMotionImage(this.device.id);
     } else {
+      // this.platform.log(`Camera ${this.device.name} has no motion detected since ${timeSinceLastDetectedMotion}ms, fetching snapshot image.`)
       response = await this.request<Buffer>({
         url: this.device.snapshotUrl + `&fn=${this.fn++}`,
         responseType: 'buffer',

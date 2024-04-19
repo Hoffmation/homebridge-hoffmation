@@ -29,6 +29,7 @@ export class HoffmationDevice {
    * @private
    */
   private lastSetBrightnessCall: number = 0;
+  private cameraDelegate: CameraDelegate | undefined;
 
   constructor(
     private readonly platform: Hoffmation,
@@ -120,9 +121,9 @@ export class HoffmationDevice {
         .onGet(this.getTemperature.bind(this));
     }
     if (caps.includes(DeviceCapability.camera)) {
-      const delegate = new CameraDelegate(this.platform, accessory, this.device, api);
+      this.cameraDelegate = new CameraDelegate(this.platform, accessory, this.device, api);
       accessory.configureController(
-        delegate.controller,
+        this.cameraDelegate.controller,
       );
     }
     if (caps.includes(DeviceCapability.ac)) {
@@ -152,6 +153,7 @@ export class HoffmationDevice {
       return;
     }
     this.cachedDevice = data;
+    this.cameraDelegate?.updateDeviceData(data);
     const caps = this.device.deviceCapabilities;
     if (caps.includes(DeviceCapability.lamp)) {
       this.lightService?.updateCharacteristic(this.platform.Characteristic.On, data.lightOn ?? false);
