@@ -5,8 +5,9 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
-## **WORK IN PROGRESS**
+## 0.4.9 (2024-04-19)
 * (theimo1221) Prefer camera motion images over fresh ones (if present)
+
 ## 0.4.8 (2024-03-29)
 * (theimo1221) Extend dimmer logging
 
