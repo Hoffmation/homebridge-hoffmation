@@ -470,6 +470,7 @@ export class CameraDelegate implements CameraStreamingDelegate {
   private async getSnapshot(): Promise<Buffer> {
     let response;
     if(this.device.lastMotionTimestamp + 35000 > Date.now()) {
+      this.platform.log(`Camera ${this.device.name} has motion detected, fetching last motion image.`)
       response = await this.api.getCameraLastMotionImage(this.device.id);
     } else {
       response = await this.request<Buffer>({

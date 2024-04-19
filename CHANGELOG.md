@@ -5,6 +5,8 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
+## **WORK IN PROGRESS**
+* (theimo1221) Extend logging
 ## 0.4.9 (2024-04-19)
 * (theimo1221) Prefer camera motion images over fresh ones (if present)
 
