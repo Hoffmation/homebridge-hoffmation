@@ -5,6 +5,8 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
+## **WORK IN PROGRESS**
+* (theimo1221) Update packages
 ## 0.4.11 (2024-04-19)
 * (theimo1221) Camera Device was not updated --> no motion image used
 
