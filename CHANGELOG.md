@@ -7,6 +7,7 @@
 -->
 ## **WORK IN PROGRESS**
 * (theimo1221) Update packages
+* (theimo1221) Compatibility with latest hoffmation-base
 ## 0.4.11 (2024-04-19)
 * (theimo1221) Camera Device was not updated --> no motion image used
 
