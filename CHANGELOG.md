@@ -5,6 +5,8 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
+## **WORK IN PROGRESS**
+* (theimo1221) Backwards compatibility
 ## 0.4.12 (2024-10-12)
 * (theimo1221) Update packages
 * (theimo1221) Compatibility with latest hoffmation-base

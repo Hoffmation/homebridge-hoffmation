@@ -104,11 +104,15 @@ export class HoffmationApiDevice {
   }
 
   public get roomTemperature(): number {
-    return (this.rawData['temperatureSensor']?.['_roomTemperature']) as number ?? -99;
+    return (this.rawData['temperatureSensor']?.['_roomTemperature']) as number ??
+      this.rawData['_roomTemperature'] as number ??
+      -99;
   }
 
   public get temperature(): number {
-    return (this.rawData['temperatureSensor']?.['_temperature']) as number ?? -99;
+    return (this.rawData['temperatureSensor']?.['_temperature']) as number ??
+      this.rawData['_temperature'] as number ??
+      -99;
   }
 
   public constructor(
