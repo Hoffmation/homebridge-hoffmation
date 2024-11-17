@@ -5,7 +5,7 @@ import { HoffmationApi } from '../api';
 import { DeviceCapability } from 'hoffmation-base/lib/server/devices/DeviceCapability';
 import { HoffmationApiDevice } from '../models/hoffmationApi/hoffmationApiDevice';
 import { CameraDelegate } from '../CameraHandling/CameraDelegate';
-import { CurrentDoorState, LockCurrentState } from 'hap-nodejs/dist/lib/definitions/CharacteristicDefinitions';
+import { CurrentDoorState, LockCurrentState, LockTargetState } from 'hap-nodejs/dist/lib/definitions/CharacteristicDefinitions';
 
 /**
  * Platform Accessory
@@ -77,7 +77,7 @@ export class HoffmationDevice {
         .onGet(this.getHandleCurrentPos.bind(this));
       this.handleService.getCharacteristic(this.platform.Characteristic.LockTargetState)
         .onSet(this.setHandleTargetPos.bind(this))
-        .onGet(this.getHandleCurrentPos.bind(this));
+        .onGet(this.getHandleTargetPos.bind(this));
     }
     if (caps.includes(DeviceCapability.scene)) {
       this.sceneService = this.accessory.getService(this.platform.Service.Switch) ||
@@ -366,6 +366,10 @@ export class HoffmationDevice {
       return false;
     }
     return this.getLightOn();
+  }
+
+  async getHandleTargetPos(): Promise<CharacteristicValue> {
+    return LockTargetState.SECURED;
   }
 
   async getHandleCurrentPos(): Promise<CharacteristicValue> {
