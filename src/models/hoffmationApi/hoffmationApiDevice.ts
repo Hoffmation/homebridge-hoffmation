@@ -1,6 +1,6 @@
 import { DeviceCapability } from 'hoffmation-base/lib/server/devices/DeviceCapability';
 import { HoffmationApiDeviceInfo } from './HoffmationApiDeviceInfo';
-import { CurrentDoorState, TargetDoorState } from 'hap-nodejs/dist/lib/definitions/CharacteristicDefinitions';
+import { CurrentDoorState, LockCurrentState, TargetDoorState } from 'hap-nodejs/dist/lib/definitions/CharacteristicDefinitions';
 
 export class HoffmationApiDevice {
   public get rtspUrl(): string {
@@ -38,6 +38,26 @@ export class HoffmationApiDevice {
 
   public get currentShutterPosition(): number {
     return Math.max(Math.min((this.rawData['_currentLevel']) as number ?? 0, 100), 0);
+  }
+
+  public get currentHandleNumericPosition(): number {
+    return this.rawData['position'] as number ??
+      this.rawData['handleSensor']?.['position'] as number ??
+      -1;
+  }
+
+  public get currentHandlePosition(): number {
+    switch (this.currentHandleNumericPosition) {
+      case -1:
+        return LockCurrentState.UNKNOWN;
+      case 0:
+        return LockCurrentState.SECURED;
+      case 1:
+        return LockCurrentState.JAMMED;
+      case 2:
+        return LockCurrentState.UNSECURED;
+    }
+    return LockCurrentState.UNKNOWN;
   }
 
 

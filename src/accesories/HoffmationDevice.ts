@@ -5,7 +5,7 @@ import { HoffmationApi } from '../api';
 import { DeviceCapability } from 'hoffmation-base/lib/server/devices/DeviceCapability';
 import { HoffmationApiDevice } from '../models/hoffmationApi/hoffmationApiDevice';
 import { CameraDelegate } from '../CameraHandling/CameraDelegate';
-import { CurrentDoorState } from 'hap-nodejs/dist/lib/definitions/CharacteristicDefinitions';
+import { CurrentDoorState, LockCurrentState } from 'hap-nodejs/dist/lib/definitions/CharacteristicDefinitions';
 
 /**
  * Platform Accessory
@@ -16,6 +16,7 @@ export class HoffmationDevice {
   private infoService: Service;
   private lightService: Service | undefined;
   private sceneService: Service | undefined;
+  private handleService: Service | undefined;
   private motionService: Service | undefined;
   private shutterService: Service | undefined;
   private temperatureService: Service | undefined;
@@ -68,6 +69,15 @@ export class HoffmationDevice {
       this.lightService.getCharacteristic(this.platform.Characteristic.On)
         .onSet(this.setOn.bind(this))
         .onGet(this.getActuatorOn.bind(this));
+    }
+    if (caps.includes(DeviceCapability.handleSensor)) {
+      this.handleService = this.accessory.getService(this.platform.Service.LockMechanism) ||
+        this.accessory.addService(this.platform.Service.LockMechanism);
+      this.handleService.getCharacteristic(this.platform.Characteristic.LockCurrentState)
+        .onGet(this.getHandleCurrentPos.bind(this));
+      this.handleService.getCharacteristic(this.platform.Characteristic.LockTargetState)
+        .onSet(this.setHandleTargetPos.bind(this))
+        .onGet(this.getHandleCurrentPos.bind(this));
     }
     if (caps.includes(DeviceCapability.scene)) {
       this.sceneService = this.accessory.getService(this.platform.Service.Switch) ||
@@ -166,6 +176,9 @@ export class HoffmationDevice {
     if (caps.includes(DeviceCapability.temperatureSensor)) {
       this.temperatureService?.updateCharacteristic(this.platform.Characteristic.CurrentTemperature, data.temperature);
     }
+    if (caps.includes(DeviceCapability.handleSensor)) {
+      this.handleService?.updateCharacteristic(this.platform.Characteristic.CurrentPosition, data.currentHandlePosition);
+    }
     if (caps.includes(DeviceCapability.shutter)) {
       this.shutterService?.updateCharacteristic(this.platform.Characteristic.CurrentPosition, data.currentShutterPosition);
     }
@@ -198,7 +211,7 @@ export class HoffmationDevice {
     const thisDate: number = Date.now();
     this.lastSetBrightnessCall = thisDate;
     setTimeout(async () => {
-      if(thisDate !== this.lastSetBrightnessCall) {
+      if (thisDate !== this.lastSetBrightnessCall) {
         // Es gab in der Zwischenzeit einen weiteren Aufruf von setBrightness
         return;
       }
@@ -234,6 +247,11 @@ export class HoffmationDevice {
   async setGarageDoorTargetState(value: CharacteristicValue) {
     this.platform.log.info('setGarageDoorTargetState ->', value);
     await this.api.setGarageDoor(this.device.id, (value as number) === 0);
+    await this.updateSelf();
+  }
+
+  async setHandleTargetPos(value: CharacteristicValue) {
+    this.platform.log.info('setHandleTargetPos ->', value);
     await this.updateSelf();
   }
 
@@ -350,6 +368,19 @@ export class HoffmationDevice {
     return this.getLightOn();
   }
 
+  async getHandleCurrentPos(): Promise<CharacteristicValue> {
+    if (!this.device.deviceCapabilities.includes(DeviceCapability.handleSensor)) {
+      return LockCurrentState.UNKNOWN;
+    }
+    if (this.cachedDevice !== undefined) {
+      return this.cachedDevice.currentHandlePosition;
+    }const update = await this.updateSelf();
+    if (!update) {
+      return LockCurrentState.UNKNOWN;
+    }
+    return this.getHandleCurrentPos();
+  }
+
   async getShutterCurrentPos(): Promise<CharacteristicValue> {
     if (!this.device.deviceCapabilities.includes(DeviceCapability.shutter)) {
       return 0;
@@ -430,18 +461,18 @@ export class HoffmationDevice {
       await this.api.setLamp(this.device.id, value);
       return;
     }
-    if(Date.now() - this.lastSetBrightnessCall < 400) {
+    if (Date.now() - this.lastSetBrightnessCall < 400) {
       this.platform.log('Ignoring setOn call as it was called less than 400ms after setBrightness');
       return;
     }
     setTimeout(() => {
-      if (Date.now() - this.lastSetBrightnessCall < 500) {
-        this.platform.log('Ignoring setOn call as within 400ms of this setBrightness got called');
-        return;
-      }
-      this.api.setLamp(this.device.id, value);
-    },
-    400,
+        if (Date.now() - this.lastSetBrightnessCall < 500) {
+          this.platform.log('Ignoring setOn call as within 400ms of this setBrightness got called');
+          return;
+        }
+        this.api.setLamp(this.device.id, value);
+      },
+      400,
     );
   }
 }
