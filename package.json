@@ -1,7 +1,7 @@
 {
   "displayName": "Hoffmation",
   "name": "homebridge-hoffmation",
-  "version": "0.4.13",
+  "version": "0.4.14",
   "description": "Connecting Hoffmation Devices to HomeKit",
   "license": "Apache-2.0",
   "repository": {

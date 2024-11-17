@@ -5,8 +5,9 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
-## **WORK IN PROGRESS**
+## 0.4.14 (2024-11-17)
 * (theimo1221) Add handle sensor handling
+
 ## 0.4.13 (2024-10-12)
 * (theimo1221) Backwards compatibility
 
