@@ -36,6 +36,7 @@
     "homebridge-plugin"
   ],
   "dependencies": {
+    "hap-nodejs": "^1.1.0",
     "hoffmation-base": "3.0.0-beta.10",
     "got": "^11.8.6",
     "pick-port": "^2.1.0"
@@ -46,7 +47,6 @@
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "eslint": "^8.57.0",
-    "hap-nodejs": "^1.1.0",
     "homebridge": "^1.8.5",
     "nodemon": "^3.1.0",
     "rimraf": "^5.0.5",
