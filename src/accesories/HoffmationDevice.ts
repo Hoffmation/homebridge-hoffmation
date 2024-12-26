@@ -52,7 +52,7 @@ export class HoffmationDevice {
     this.infoService.setCharacteristic(this.platform.Characteristic.Identify, this.device.id);
     this.infoService.setCharacteristic(this.platform.Characteristic.Manufacturer, 'Hoffmation');
     this.infoService.setCharacteristic(this.platform.Characteristic.Model, 'Hoffmation');
-    this.infoService.setCharacteristic(this.platform.Characteristic.SerialNumber, `Hoffmation-${this.device.id}`);
+    this.infoService.setCharacteristic(this.platform.Characteristic.SerialNumber, `Hoffmation-${this.device.id}`.substring(0, 60));
     this.infoService.setCharacteristic(this.platform.Characteristic.FirmwareRevision, '1.0.0');
 
     const caps = device.deviceCapabilities;

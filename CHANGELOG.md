@@ -5,6 +5,8 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
+## **WORK IN PROGRESS**
+* (theimo1221) Limit Device ID's to below 64 characters
 ## 0.4.17-alpha.0 (2024-12-26)
 * (theimo1221) Add Prerecording
 
