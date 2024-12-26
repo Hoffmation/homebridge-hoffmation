@@ -5,8 +5,9 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
-## **WORK IN PROGRESS**
+## 0.4.17-alpha.4 (2024-12-26)
 * (theimo1221) Set RTSP to TCP and only activate audio if camera has audio
+
 ## 0.4.17-alpha.3 (2024-12-26)
 * (theimo1221) Reenable audio and add debug option
 
