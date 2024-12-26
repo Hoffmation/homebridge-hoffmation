@@ -68,7 +68,7 @@ export class CameraDelegate implements CameraStreamingDelegate {
   ) {
     const useRtsp = (platform.config as HoffmationConfig).useRtspStream ?? false;
     if (useRtsp) {
-      this.videoUrl = `-i ${device.rtspUrl}`;
+      this.videoUrl = `-rtsp_transport tcp -i ${device.rtspUrl}`;
     } else {
       this.videoUrl = `-i ${device.h264IosStreamLink.replace('/temp.m', '/temp.ts')}`;
     }
@@ -78,7 +78,7 @@ export class CameraDelegate implements CameraStreamingDelegate {
     this.videoConfig = {
       source: this.videoUrl,
       vcodec: 'copy',
-      audio: true,
+      audio: device.cameraHasAudio,
       prebuffer: true,
       recording: true,
       debug: true,
@@ -147,7 +147,7 @@ export class CameraDelegate implements CameraStreamingDelegate {
           codecs: [
             {
               type: AudioStreamingCodecType.AAC_ELD,
-              samplerate: [AudioStreamingSamplerate.KHZ_24, AudioStreamingSamplerate.KHZ_24],
+              samplerate: [AudioStreamingSamplerate.KHZ_24, AudioStreamingSamplerate.KHZ_16],
             },
           ],
         },

@@ -7,6 +7,10 @@ export class HoffmationApiDevice {
     return (this.rawData['rtspStreamLink']) as string ?? '';
   }
 
+  public get cameraHasAudio(): boolean {
+    return (this.rawData['settings']?.['hasAudio']) as boolean ?? false;
+  }
+
   public get h264IosStreamLink(): string {
     return (this.rawData['h264IosStreamLink']) as string ?? '';
   }
