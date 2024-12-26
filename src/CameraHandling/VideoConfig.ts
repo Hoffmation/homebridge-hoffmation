@@ -1,4 +1,4 @@
-export type VideoConfig = {
+export interface VideoConfig {
   source?: string;
   stillImageSource?: string;
   returnAudioTarget?: string;
@@ -17,5 +17,6 @@ export type VideoConfig = {
   audio?: boolean;
   debug?: boolean;
   debugReturn?: boolean;
+  recording?: boolean;
   prebuffer?: boolean;
-};
+}

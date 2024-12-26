@@ -80,6 +80,9 @@ export class CameraDelegate implements CameraStreamingDelegate {
     this.videoConfig = {
       source: this.videoUrl,
       vcodec: 'copy',
+      audio: true,
+      prebuffer: true,
+      recording: true,
       // maxStreams: 4,
       // maxWidth: 1920,
       // maxHeight: 1080,
