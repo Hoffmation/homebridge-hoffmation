@@ -23,7 +23,7 @@ import {
   VideoInfo,
 } from 'homebridge';
 import { HoffmationApiDevice } from '../models/hoffmationApi/hoffmationApiDevice';
-import pickPort, { pickPortOptions } from 'pick-port';
+import { pickPort, Type } from 'pick-port';
 import got, { Headers, Options as RequestOptions } from 'got';
 import { hap } from '../hap';
 import { createSocket, Socket } from 'dgram';
@@ -293,7 +293,7 @@ export class CameraDelegate implements CameraStreamingDelegate {
     this.log.debug(`prepareStream requested for ${this.device.name}`);
     const ipv6 = request.addressVersion === 'ipv6';
 
-    const options: pickPortOptions = {
+    const options: PickPortOptions = {
       type: 'udp',
       ip: ipv6 ? '::' : '0.0.0.0',
       reserveTimeout: 15,
@@ -657,3 +657,10 @@ type ActiveSession = {
   socket?: Socket;
 };
 
+type PickPortOptions = {
+  type: Type;
+  ip?: string;
+  minPort?: number;
+  maxPort?: number;
+  reserveTimeout?: number;
+};
