@@ -17,4 +17,5 @@ export type VideoConfig = {
   audio?: boolean;
   debug?: boolean;
   debugReturn?: boolean;
+  prebuffer?: boolean;
 };

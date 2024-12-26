@@ -1,8 +1,12 @@
 import { Hoffmation } from '../platform';
 import {
+  AudioRecordingCodec,
+  AudioRecordingCodecType,
+  AudioRecordingSamplerate,
   AudioStreamingCodecType,
   AudioStreamingSamplerate,
   CameraStreamingDelegate,
+  CameraControllerOptions,
   Logging,
   PlatformAccessory,
   PrepareStreamCallback,
@@ -30,6 +34,7 @@ import { ExtendedResponse } from './ExtendedResponse';
 import { VideoConfig } from './VideoConfig';
 import { HoffmationConfig } from '../models/config';
 import { HoffmationApi } from '../api';
+import { FRAGMENTS_LENGTH, PREBUFFER_LENGTH, RecordingDelegate } from './RecordingDelegate';
 
 function getDurationSeconds(start: number) {
   return (Date.now() - start) / 1000;
@@ -48,6 +53,9 @@ export class CameraDelegate implements CameraStreamingDelegate {
   private readonly videoConfig: VideoConfig;
   private readonly videoUrl: string;
   private readonly videoProcessor: string;
+  private recording: boolean = true;
+  private prebuffer: boolean = true;
+  private recordingDelegate: RecordingDelegate;
   private fn = 1;
 
   get hasSnapshotWithinLifetime() {
@@ -78,33 +86,54 @@ export class CameraDelegate implements CameraStreamingDelegate {
       // maxFPS: 5,
     };
     this.videoProcessor = 'ffmpeg';
+    const recordingCodecs: AudioRecordingCodec[] = [];
+
+    const samplerate: AudioRecordingSamplerate[] = [];
+    for (const sr of [AudioRecordingSamplerate.KHZ_32]) {
+      samplerate.push(sr);
+    }
+
+    for (const type of [AudioRecordingCodecType.AAC_LC]) {
+      const entry: AudioRecordingCodec = {
+        type,
+        bitrateMode: 0,
+        samplerate,
+        audioChannels: 1,
+      };
+      recordingCodecs.push(entry);
+    }
+
+    this.recordingDelegate = new RecordingDelegate(
+      this.platform,
+      this.device.name,
+      this.videoConfig,
+      this.videoProcessor,
+    );
+
     platform.api.on(APIEvent.SHUTDOWN, () => {
       for (const session in this.ongoingSessions) {
         this.stopStream(session);
       }
     });
-    this.controller = new hap.CameraController({
+
+    const options: CameraControllerOptions = {
       cameraStreamCount: 4,
       delegate: this,
       streamingOptions: {
         supportedCryptoSuites: [SRTPCryptoSuites.AES_CM_128_HMAC_SHA1_80],
         video: {
           resolutions: [
-            [1280, 720, 30],
-            [1280, 720, 5],
-            [1024, 768, 30],
-            [1024, 768, 5],
-            [640, 480, 30],
-            [640, 480, 5],
-            [640, 360, 30],
-            [480, 360, 30],
-            [480, 360, 5],
-            [480, 270, 30],
-            [320, 240, 30],
-            [320, 240, 5],
-            [320, 240, 15], // Apple Watch requires this configuration
             [320, 180, 30],
-            [320, 180, 5],
+            [320, 240, 15], // Apple Watch requires this configuration
+            [320, 240, 30],
+            [480, 270, 30],
+            [480, 360, 30],
+            [640, 360, 30],
+            [640, 480, 30],
+            [1280, 720, 30],
+            [1280, 960, 30],
+            [1920, 1080, 30],
+            [1600, 1200, 30],
           ],
           codec: {
             profiles: [hap.H264Profile.BASELINE, hap.H264Profile.MAIN, hap.H264Profile.HIGH],
@@ -116,14 +145,50 @@ export class CameraDelegate implements CameraStreamingDelegate {
           codecs: [
             {
               type: AudioStreamingCodecType.AAC_ELD,
-              samplerate: AudioStreamingSamplerate.KHZ_16,
+              samplerate: [AudioStreamingSamplerate.KHZ_16, AudioStreamingSamplerate.KHZ_24],
               /*type: AudioStreamingCodecType.OPUS,
               samplerate: AudioStreamingSamplerate.KHZ_24*/
             },
           ],
         },
       },
-    });
+      recording: /*!this.recording ? undefined : */ {
+        options: {
+          prebufferLength: PREBUFFER_LENGTH,
+          overrideEventTriggerOptions: [hap.EventTriggerOption.MOTION, hap.EventTriggerOption.DOORBELL],
+          mediaContainerConfiguration: [{
+            type: 0,
+            fragmentLength: FRAGMENTS_LENGTH,
+          }],
+          video: {
+            type: hap.VideoCodecType.H264,
+            parameters: {
+              levels: [hap.H264Level.LEVEL3_1, hap.H264Level.LEVEL3_2, hap.H264Level.LEVEL4_0],
+              profiles: [hap.H264Profile.BASELINE, hap.H264Profile.MAIN, hap.H264Profile.HIGH],
+            },
+            resolutions: [
+              [320, 180, 30],
+              [320, 240, 15], // Apple Watch requires this configuration
+              [320, 240, 30],
+              [480, 270, 30],
+              [480, 360, 30],
+              [640, 360, 30],
+              [640, 480, 30],
+              [1280, 720, 30],
+              [1280, 960, 30],
+              [1920, 1080, 30],
+              [1600, 1200, 30],
+            ],
+          },
+          audio: {
+            codecs: recordingCodecs,
+          }
+        },
+        delegate: this.recordingDelegate,
+      },
+    };
+
+    this.controller = new hap.CameraController(options);
   }
 
   public updateDeviceData(data: HoffmationApiDevice) {
@@ -475,8 +540,8 @@ export class CameraDelegate implements CameraStreamingDelegate {
   private async getSnapshot(): Promise<Buffer> {
     let response;
     const timeSinceLastDetectedMotion = Date.now() - this.device.lastMotionTimestamp;
-    if(timeSinceLastDetectedMotion < 60000) {
-      this.platform.log(`Camera ${this.device.name} has motion detected, fetching last motion image.`)
+    if (timeSinceLastDetectedMotion < 60000) {
+      this.platform.log(`Camera ${this.device.name} has motion detected, fetching last motion image.`);
       response = await this.api.getCameraLastMotionImage(this.device.id);
     } else {
       // this.platform.log(`Camera ${this.device.name} has no motion detected since ${timeSinceLastDetectedMotion}ms, fetching snapshot image.`)
