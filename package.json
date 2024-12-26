@@ -12,7 +12,7 @@
     "url": "https://github.com/Hoffmation/homebridge-hoffmation/issues"
   },
   "engines": {
-    "node": "^18.17.0",
+    "node": "22.* | 20.*",
     "homebridge": "^1.6.0"
   },
   "main": "dist/index.js",
