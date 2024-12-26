@@ -5,6 +5,8 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
+## **WORK IN PROGRESS**
+* (theimo1221) Reenable audio and add debug option
 ## 0.4.17-alpha.2 (2024-12-26)
 * (theimo1221) Change some camera options and temporarily disable audio
 

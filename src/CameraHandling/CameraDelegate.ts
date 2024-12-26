@@ -5,8 +5,8 @@ import {
   AudioRecordingSamplerate,
   AudioStreamingCodecType,
   AudioStreamingSamplerate,
-  CameraStreamingDelegate,
   CameraControllerOptions,
+  CameraStreamingDelegate,
   Logging,
   PlatformAccessory,
   PrepareStreamCallback,
@@ -53,8 +53,6 @@ export class CameraDelegate implements CameraStreamingDelegate {
   private readonly videoConfig: VideoConfig;
   private readonly videoUrl: string;
   private readonly videoProcessor: string;
-  private recording: boolean = true;
-  private prebuffer: boolean = true;
   private recordingDelegate: RecordingDelegate;
   private fn = 1;
 
@@ -80,9 +78,10 @@ export class CameraDelegate implements CameraStreamingDelegate {
     this.videoConfig = {
       source: this.videoUrl,
       vcodec: 'copy',
-      // audio: true,
+      audio: true,
       prebuffer: true,
       recording: true,
+      debug: true,
       // maxStreams: 4,
       // maxWidth: 1920,
       // maxHeight: 1080,
@@ -148,7 +147,7 @@ export class CameraDelegate implements CameraStreamingDelegate {
           codecs: [
             {
               type: AudioStreamingCodecType.AAC_ELD,
-              samplerate: [AudioStreamingSamplerate.KHZ_16, AudioStreamingSamplerate.KHZ_24],
+              samplerate: [AudioStreamingSamplerate.KHZ_24, AudioStreamingSamplerate.KHZ_24],
             },
           ],
         },
@@ -405,26 +404,20 @@ export class CameraDelegate implements CameraStreamingDelegate {
     if (this.videoConfig.audio) {
       if (request.audio.codec === AudioStreamingCodecType.OPUS || request.audio.codec === AudioStreamingCodecType.AAC_ELD) {
         ffmpegArgs // Audio
-          += `${(this.videoConfig.mapaudio ? ` -map ${this.videoConfig.mapaudio}` : ' -vn -sn -dn')
+          += `${(this.videoConfig.mapaudio ? ` -map ${this.videoConfig.mapaudio}` : ' -vn -sn -dn')}`
           + (request.audio.codec === AudioStreamingCodecType.OPUS
-            ? ' -codec:a libopus'
-            + ' -application lowdelay'
-            : ' -codec:a libfdk_aac'
-            + ' -profile:a aac_eld')
-          } -flags +global_header`
-          + ' -f null'
+            ? ' -codec:a libopus -application lowdelay'
+            : ' -codec:a libfdk_aac -profile:a aac_eld')
+          + ' -flags +global_header -f null'
           + ` -ar ${request.audio.sample_rate}k`
           + ` -b:a ${request.audio.max_bit_rate}k`
-          + ` -ac ${request.audio.channel
-          } -payload_type ${request.audio.pt}`;
+          + ` -ac ${request.audio.channel} -payload_type ${request.audio.pt}`;
 
         ffmpegArgs // Audio Stream
-          += ` -ssrc ${sessionInfo.audioSSRC
-          } -f rtp`
-            + ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80'
-            + ` -srtp_out_params ${sessionInfo.audioSRTP.toString('base64')
-            } srtp://${sessionInfo.address}:${sessionInfo.audioPort
-            }?rtcpport=${sessionInfo.audioPort}&pkt_size=188`;
+          += ` -ssrc ${sessionInfo.audioSSRC} -f rtp`
+          + ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80'
+          + ` -srtp_out_params ${
+          sessionInfo.audioSRTP.toString('base64')} srtp://${sessionInfo.address}:${sessionInfo.audioPort}?rtcpport=${sessionInfo.audioPort}&pkt_size=188`;
       } else {
         this.log.error('Unsupported audio codec requested: ' + request.audio.codec, this.device.name);
       }
@@ -488,7 +481,7 @@ export class CameraDelegate implements CameraStreamingDelegate {
         ffmpegReturnArgs,
         this.ffmpegLog,
         this.videoConfig.debugReturn,
-        this
+        this,
       );
       activeSession.returnProcess.stdin.end(sdpReturnAudio);
     }
