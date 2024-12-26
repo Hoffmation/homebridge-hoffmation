@@ -5,8 +5,9 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
-## **WORK IN PROGRESS**
+## 0.5.2 (2024-12-26)
 * (theimo1221) Hap Dependency is needed as direct dependency
+
 ## 0.5.1 (2024-12-26)
 * (theimo1221) Move hap-nodejs to dev dependencies
 * (theimo1221) Update Packages
