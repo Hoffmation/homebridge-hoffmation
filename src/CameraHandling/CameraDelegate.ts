@@ -81,7 +81,7 @@ export class CameraDelegate implements CameraStreamingDelegate {
       audio: device.cameraHasAudio,
       prebuffer: true,
       recording: true,
-      debug: true,
+      // debug: true,
       // maxStreams: 4,
       // maxWidth: 1920,
       // maxHeight: 1080,

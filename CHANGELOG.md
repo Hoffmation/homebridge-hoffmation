@@ -5,21 +5,10 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
-## 0.4.17-alpha.4 (2024-12-26)
-* (theimo1221) Set RTSP to TCP and only activate audio if camera has audio
-
-## 0.4.17-alpha.3 (2024-12-26)
-* (theimo1221) Reenable audio and add debug option
-
-## 0.4.17-alpha.2 (2024-12-26)
-* (theimo1221) Change some camera options and temporarily disable audio
-
-## 0.4.17-alpha.1 (2024-12-26)
+## **WORK IN PROGRESS**
+* (theimo1221) Add Prerecording and audio to camera feed
 * (theimo1221) Limit Device ID's to below 64 characters
 * (theimo1221) Enable Buffered video
-
-## 0.4.17-alpha.0 (2024-12-26)
-* (theimo1221) Add Prerecording
 
 ## 0.4.16 (2024-12-26)
 * (theimo1221) Add Smoke Sensor
