@@ -60,6 +60,10 @@ export class HoffmationApiDevice {
     return LockCurrentState.UNKNOWN;
   }
 
+  public get smokeDetected(): boolean {
+    return (this.rawData['smoke'] ?? this.rawData['_smoke']) as boolean ?? false;
+  }
+
 
   public get targetGarageDoorState(): number {
     const isClosed = this.rawData['_switchState'] as boolean | undefined;

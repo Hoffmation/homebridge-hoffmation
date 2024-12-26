@@ -174,6 +174,9 @@ export class Hoffmation implements DynamicPlatformPlugin {
     if (device.deviceCapabilities.includes(DeviceCapability.garageDoorOpener) && config.useGarageDoorDevices) {
       return true;
     }
+    if (device.deviceCapabilities.includes(DeviceCapability.smokeSensor) && config.useSmokeSensorDevices) {
+      return true;
+    }
     return false;
   }
 }

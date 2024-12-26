@@ -5,6 +5,8 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
+## **WORK IN PROGRESS**
+* (theimo1221) Add Smoke Sensor
 ## 0.4.15 (2024-11-17)
 * (theimo1221) Handle target lock state only allows 0 and 1
 

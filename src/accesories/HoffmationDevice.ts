@@ -5,7 +5,12 @@ import { HoffmationApi } from '../api';
 import { DeviceCapability } from 'hoffmation-base/lib/server/devices/DeviceCapability';
 import { HoffmationApiDevice } from '../models/hoffmationApi/hoffmationApiDevice';
 import { CameraDelegate } from '../CameraHandling/CameraDelegate';
-import { CurrentDoorState, LockCurrentState, LockTargetState } from 'hap-nodejs/dist/lib/definitions/CharacteristicDefinitions';
+import {
+  CurrentDoorState,
+  LockCurrentState,
+  LockTargetState,
+  SmokeDetected,
+} from 'hap-nodejs/dist/lib/definitions/CharacteristicDefinitions';
 
 /**
  * Platform Accessory
@@ -19,6 +24,7 @@ export class HoffmationDevice {
   private handleService: Service | undefined;
   private motionService: Service | undefined;
   private shutterService: Service | undefined;
+  private smokeService: Service | undefined;
   private temperatureService: Service | undefined;
   private cachedDevice: HoffmationApiDevice | undefined;
   private acService: Service | undefined;
@@ -119,6 +125,12 @@ export class HoffmationDevice {
         this.accessory.addService(this.platform.Service.MotionSensor);
       this.motionService.getCharacteristic(this.platform.Characteristic.MotionDetected)
         .onGet(this.getMotion.bind(this));
+    }
+    if (caps.includes(DeviceCapability.smokeSensor)) {
+      this.smokeService = this.accessory.getService(this.platform.Service.SmokeSensor) ||
+        this.accessory.addService(this.platform.Service.SmokeSensor);
+      this.smokeService.getCharacteristic(this.platform.Characteristic.SmokeDetected)
+        .onGet(this.getSmoke.bind(this));
     }
     if (caps.includes(DeviceCapability.temperatureSensor)) {
       this.temperatureService = this.accessory.getService(this.platform.Service.TemperatureSensor) ||
@@ -274,6 +286,21 @@ export class HoffmationDevice {
       return false;
     }
     return this.getMotion();
+  }
+
+  async getSmoke(): Promise<CharacteristicValue> {
+    if (!this.device.deviceCapabilities.includes(DeviceCapability.smokeSensor)) {
+      return SmokeDetected.SMOKE_NOT_DETECTED;
+    }
+    if (this.cachedDevice !== undefined) {
+      return this.cachedDevice.smokeDetected ? SmokeDetected.SMOKE_DETECTED : SmokeDetected.SMOKE_NOT_DETECTED;
+    }
+
+    const update = await this.updateSelf();
+    if (!update) {
+      return SmokeDetected.SMOKE_NOT_DETECTED;
+    }
+    return this.getSmoke();
   }
 
   async getActuatorOn(): Promise<CharacteristicValue> {
