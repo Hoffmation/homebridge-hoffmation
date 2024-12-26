@@ -5,9 +5,10 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
-## **WORK IN PROGRESS**
+## 0.5.1 (2024-12-26)
 * (theimo1221) Move hap-nodejs to dev dependencies
 * (theimo1221) Update Packages
+
 ## 0.5.0 (2024-12-26)
 * (theimo1221) Add Prerecording and audio to camera feed
 * (theimo1221) Limit Device ID's to below 64 characters
