@@ -456,7 +456,7 @@ export class CameraDelegate implements CameraStreamingDelegate {
         + ' -protocol_whitelist pipe,udp,rtp,file,crypto'
         + ' -f sdp'
         + ' -c:a libfdk_aac'
-        + ' -i pipe:'
+        + ' -y -i pipe:'
         + ` ${this.videoConfig.returnAudioTarget
         } -loglevel level${this.videoConfig.debugReturn ? '+verbose' : ''}`;
 
