@@ -5,6 +5,8 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
+## **WORK IN PROGRESS**
+* (theimo1221) Try debuggable support for 2-way audio
 ## 0.5.2 (2024-12-26)
 * (theimo1221) Hap Dependency is needed as direct dependency
 

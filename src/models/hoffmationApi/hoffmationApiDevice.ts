@@ -11,6 +11,10 @@ export class HoffmationApiDevice {
     return (this.rawData['settings']?.['hasAudio']) as boolean ?? false;
   }
 
+  public get cameraHasSpeaker(): boolean {
+    return (this.rawData['settings']?.['hasSpeaker']) as boolean ?? this.cameraHasAudio;
+  }
+
   public get h264IosStreamLink(): string {
     return (this.rawData['h264IosStreamLink']) as string ?? '';
   }
