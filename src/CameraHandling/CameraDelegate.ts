@@ -110,6 +110,7 @@ export class CameraDelegate implements CameraStreamingDelegate {
       recordingCodecs.push(entry);
     }
     if (this.recordingActive) {
+      this.log.debug('Creating new RecordingDelegate for ' + this.device.name);
       this.recordingDelegate = new RecordingDelegate(
         this.platform,
         this.device,
