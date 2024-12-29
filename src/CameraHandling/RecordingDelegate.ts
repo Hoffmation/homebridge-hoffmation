@@ -181,35 +181,7 @@ export class RecordingDelegate implements CameraRecordingDelegate {
     }
     const session: FFMpegFragmentedMP4Session = await this.startSession();
     this.sessions.set(streamId, session);
-    // Process our FFmpeg-generated segments and send them back to HKSV.
-    try {
-      for await (const segment of session.generator) {
-        if (session.cp.killed || session.cp.exitCode !== null) {
-          break;
-        }
-        // No segment doesn't mean we're done necessarily, but it does mean we need to wait for FFmpeg to catch up.
-        if (!segment) {
-          continue;
-        }
-
-        // Keep track of how many segments we're sending to HKSV.
-        this.transmittedSegments++;
-
-        // Send HKSV the fMP4 segment.
-        yield {data: segment.data, isLast: false};
-      }
-
-      // If FFmpeg timed out it's typically due to the quality of the video coming from the Protect controller. Restart the livestream API to see if we can improve things.
-      if (session.cp.killed || session.cp.exitCode !== null) {
-
-        // Send HKSV a final segment to cleanly wrap up.
-        yield {data: Buffer.alloc(1, 0), isLast: true};
-      }
-    } catch (e) {
-      this.log.error(`Error processing fMP4 stream for ${this.cameraName}`, e);
-    } finally {
-      this.closeRecordingStream(streamId, undefined);
-    }
+    yield* this.yieldSessionFragments(session);
   }
 
   closeRecordingStream(streamId: number, reason: HDSProtocolSpecificErrorReason | undefined): void {
@@ -239,10 +211,14 @@ export class RecordingDelegate implements CameraRecordingDelegate {
     }
   }
 
-  async* handleFragmentsRequests(configuration: CameraRecordingConfiguration): AsyncGenerator<Buffer, void, unknown> {
+  async* handleFragmentsRequests(configuration: CameraRecordingConfiguration): AsyncGenerator<RecordingPacket> {
     this.log.debug('video fragments requested', this.cameraName);
     const session: FFMpegFragmentedMP4Session = await this.startSession(configuration);
 
+    yield* this.yieldSessionFragments(session);
+  }
+
+  async* yieldSessionFragments(session: FFMpegFragmentedMP4Session): AsyncGenerator<RecordingPacket> {
     const {socket, cp, generator} = session;
     let pending: Array<Buffer> = [];
     let filebuffer: Buffer = Buffer.alloc(0);
@@ -256,10 +232,11 @@ export class RecordingDelegate implements CameraRecordingDelegate {
           const fragment = Buffer.concat(pending);
           filebuffer = Buffer.concat([filebuffer, Buffer.concat(pending)]);
           pending = [];
-          yield fragment;
+          yield {data: fragment, isLast: false};
         }
         this.log.debug(`mp4 box type ${type} and length: ${length}`, this.cameraName);
       }
+      yield {data: Buffer.alloc(1, 0), isLast: true};
     } catch (e) {
       this.log.info(`Recoding completed. ${e}`, this.cameraName);
       /*
