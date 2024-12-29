@@ -131,7 +131,6 @@ export class RecordingDelegate implements CameraRecordingDelegate {
   readonly controller?: CameraController;
   private preBufferSession?: Mp4Session;
   private preBuffer?: PreBuffer;
-  private isTransmitting: boolean = false;
   private recordingConfiguration?: CameraRecordingConfiguration;
   private sessions: Map<number, FFMpegFragmentedMP4Session> = new Map();
 
@@ -171,7 +170,6 @@ export class RecordingDelegate implements CameraRecordingDelegate {
     // The first transmitted segment in an fMP4 stream is always the initialization segment and contains no video, so we don't count it.
     this.transmittedSegments = 0;
 
-    // If we are recording HKSV events and we haven't fully initialized our timeshift buffer (e.g. offline cameras preventing us from doing so), then do so now.
     if (this.accessory.context.hksvRecording && this.isRecording && !this.preBuffer) {
 
       await this.updateRecordingActive(this.isRecording);

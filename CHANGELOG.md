@@ -5,38 +5,9 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
-## 0.5.3-alpha.10 (2024-12-29)
-* (theimo1221) Change Buffer yielding
-
-## 0.5.3-alpha.9 (2024-12-29)
-* (theimo1221) Stabilize Recording
-
-## 0.5.3-alpha.8 (2024-12-29)
-* (theimo1221) Save and use Configuration
-
-## 0.5.3-alpha.7 (2024-12-29)
-* (theimo1221) Add Logging
-
-## 0.5.3-alpha.6 (2024-12-29)
-* (theimo1221) Further test secure video recording
-
-## 0.5.3-alpha.5 (2024-12-29)
-* (theimo1221) Activate Prebuffer Debug
-
-## 0.5.3-alpha.4 (2024-12-29)
-* (theimo1221) Start Prebuffer
-
-## 0.5.3-alpha.3 (2024-12-29)
-* (theimo1221) Make debug configurable
-
-## 0.5.3-alpha.2 (2024-12-28)
-* (theimo1221) Always overwrite 2-way-audio-output file
-
-## 0.5.3-alpha.1 (2024-12-28)
-* (theimo1221) Debug ffmpeg return
-
-## 0.5.3-alpha.0 (2024-12-28)
-* (theimo1221) Try debuggable support for 2-way audio
+## **WORK IN PROGRESS**
+* (theimo1221) Some changes to audio and experimental HKSV support
+* (theimo1221) Allow option to skip certain devices for homebridge
 
 ## 0.5.2 (2024-12-26)
 * (theimo1221) Hap Dependency is needed as direct dependency

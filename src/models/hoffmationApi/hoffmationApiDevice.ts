@@ -23,6 +23,10 @@ export class HoffmationApiDevice {
     return (this.rawData['currentImageLink'] as string) ?? '';
   }
 
+  public get skipInHomebridge(): boolean {
+    return (this.rawData['settings']?.['skipInHomebridge'] as boolean) ?? false;
+  }
+
   public get deviceCapabilities(): DeviceCapability[] {
     return (this.rawData['_deviceCapabilities'] ?? this.rawData['deviceCapabilities']) as DeviceCapability[] ?? [];
   }

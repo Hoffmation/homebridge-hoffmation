@@ -144,6 +144,9 @@ export class Hoffmation implements DynamicPlatformPlugin {
 
   private shouldIncludeDevice(device: HoffmationApiDevice): boolean {
     const config = this.config as HoffmationConfig;
+    if (device.skipInHomebridge) {
+      return false;
+    }
     if (device.deviceCapabilities.includes(DeviceCapability.ac) && config.useAcDevices) {
       return true;
     }
