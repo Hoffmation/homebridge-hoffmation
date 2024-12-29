@@ -258,7 +258,7 @@ export class RecordingDelegate implements CameraRecordingDelegate {
           pending = [];
           yield fragment;
         }
-        this.log.debug(`mp4 box type ${type} and lenght: ${length}`, this.cameraName);
+        this.log.debug(`mp4 box type ${type} and length: ${length}`, this.cameraName);
       }
     } catch (e) {
       this.log.info(`Recoding completed. ${e}`, this.cameraName);
@@ -320,10 +320,11 @@ export class RecordingDelegate implements CameraRecordingDelegate {
           'frag_keyframe+empty_moov+default_base_moof',
           `tcp://127.0.0.1:${serverPort}`,
         );
+        args.push(' -loglevel level' + (this.videoConfig.debug ? '+verbose' : ''))
 
         this.log.debug(`${ffmpegPath} ${args.join(' ')}`, this.cameraName);
 
-        const debug = false;
+        const debug: boolean = this.videoConfig.debug ?? false;
 
         const stdioValue = debug ? 'pipe' : 'ignore';
         this.process = spawn(ffmpegPath, args, {env, stdio: stdioValue});
