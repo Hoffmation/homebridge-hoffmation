@@ -9,7 +9,8 @@ import {
   AudioRecordingCodecType,
   CameraController,
   CameraRecordingConfiguration,
-  CameraRecordingDelegate, CameraRecordingOptions,
+  CameraRecordingDelegate,
+  CameraRecordingOptions,
   H264Level,
   H264Profile,
   HDSProtocolSpecificErrorReason,
@@ -175,32 +176,39 @@ export class RecordingDelegate implements CameraRecordingDelegate {
 
       await this.updateRecordingActive(this.isRecording);
     }
-    if (!this.sessions.has(streamId)) {
-      this.sessions.set(streamId, await this.startSession());
+    if(this.sessions.has(streamId)) {
+      this.closeRecordingStream(streamId, HDSProtocolSpecificErrorReason.BUSY);
     }
-    const session: FFMpegFragmentedMP4Session = this.sessions.get(streamId)!;
+    const session: FFMpegFragmentedMP4Session = await this.startSession();
+    this.sessions.set(streamId, session);
     // Process our FFmpeg-generated segments and send them back to HKSV.
-    for await (const segment of session.generator) {
+    try {
+      for await (const segment of session.generator) {
+        if (session.cp.killed || session.cp.exitCode !== null) {
+          break;
+        }
+        // No segment doesn't mean we're done necessarily, but it does mean we need to wait for FFmpeg to catch up.
+        if (!segment) {
+          continue;
+        }
+
+        // Keep track of how many segments we're sending to HKSV.
+        this.transmittedSegments++;
+
+        // Send HKSV the fMP4 segment.
+        yield {data: segment.data, isLast: false};
+      }
+
+      // If FFmpeg timed out it's typically due to the quality of the video coming from the Protect controller. Restart the livestream API to see if we can improve things.
       if (session.cp.killed || session.cp.exitCode !== null) {
-        break;
+
+        // Send HKSV a final segment to cleanly wrap up.
+        yield {data: Buffer.alloc(1, 0), isLast: true};
       }
-      // No segment doesn't mean we're done necessarily, but it does mean we need to wait for FFmpeg to catch up.
-      if (!segment) {
-        continue;
-      }
-
-      // Keep track of how many segments we're sending to HKSV.
-      this.transmittedSegments++;
-
-      // Send HKSV the fMP4 segment.
-      yield {data: segment.data, isLast: false};
-    }
-
-    // If FFmpeg timed out it's typically due to the quality of the video coming from the Protect controller. Restart the livestream API to see if we can improve things.
-    if (session.cp.killed || session.cp.exitCode !== null) {
-
-      // Send HKSV a final segment to cleanly wrap up.
-      yield {data: Buffer.alloc(1, 0), isLast: true};
+    } catch (e) {
+      this.log.error(`Error processing fMP4 stream for ${this.cameraName}`, e);
+    } finally {
+      this.closeRecordingStream(streamId, undefined);
     }
   }
 
@@ -273,7 +281,7 @@ export class RecordingDelegate implements CameraRecordingDelegate {
     iframeIntervalSeconds: number = 4,
   ): Promise<FFMpegFragmentedMP4Session> {
     configuration ??= this.recordingConfiguration
-    if(!configuration) {
+    if (!configuration) {
       throw new Error('No configuration provided');
     }
     const audioArgs: Array<string> = [
