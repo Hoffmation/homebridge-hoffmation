@@ -5,8 +5,9 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
-## **WORK IN PROGRESS**
+## 0.5.3-alpha.8 (2024-12-29)
 * (theimo1221) Save and use Configuration
+
 ## 0.5.3-alpha.7 (2024-12-29)
 * (theimo1221) Add Logging
 
