@@ -5,6 +5,8 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
+## **WORK IN PROGRESS**
+* (theimo1221) Make debug configurable
 ## 0.5.3-alpha.2 (2024-12-28)
 * (theimo1221) Always overwrite 2-way-audio-output file
 

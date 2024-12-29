@@ -76,6 +76,18 @@
         "type": "boolean",
         "required": true,
         "default": true
+      },
+      "debugCameraVideo": {
+        "title": "Activate FFMPEG debug for camera video",
+        "type": "boolean",
+        "required": true,
+        "default": false
+      },
+      "debugCameraAudio": {
+        "title": "Activate FFMPEG debug for camera audio",
+        "type": "boolean",
+        "required": true,
+        "default": false
       }
     }
   }
