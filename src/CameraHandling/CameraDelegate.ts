@@ -5,7 +5,7 @@ import {
   AudioRecordingSamplerate,
   AudioStreamingCodecType,
   AudioStreamingSamplerate,
-  CameraControllerOptions,
+  CameraControllerOptions, CameraRecordingOptions,
   CameraStreamingDelegate,
   Logging,
   PlatformAccessory,
@@ -109,6 +109,37 @@ export class CameraDelegate implements CameraStreamingDelegate {
       };
       recordingCodecs.push(entry);
     }
+    const cameraRecordingOptions: CameraRecordingOptions = {
+      prebufferLength: PREBUFFER_LENGTH,
+      overrideEventTriggerOptions: [hap.EventTriggerOption.MOTION, hap.EventTriggerOption.DOORBELL],
+      mediaContainerConfiguration: [{
+        type: 0,
+        fragmentLength: FRAGMENTS_LENGTH,
+      }],
+      video: {
+        type: hap.VideoCodecType.H264,
+        parameters: {
+          levels: [hap.H264Level.LEVEL3_1, hap.H264Level.LEVEL3_2, hap.H264Level.LEVEL4_0],
+          profiles: [hap.H264Profile.BASELINE, hap.H264Profile.MAIN, hap.H264Profile.HIGH],
+        },
+        resolutions: [
+          [320, 180, 30],
+          [320, 240, 15], // Apple Watch requires this configuration
+          [320, 240, 30],
+          [480, 270, 30],
+          [480, 360, 30],
+          [640, 360, 30],
+          [640, 480, 30],
+          [1280, 720, 30],
+          [1280, 960, 30],
+          [1920, 1080, 30],
+          [1600, 1200, 30],
+        ],
+      },
+      audio: {
+        codecs: recordingCodecs,
+      },
+    };
     if (this.recordingActive) {
       this.log.debug('Creating new RecordingDelegate for ' + this.device.name);
       this.recordingDelegate = new RecordingDelegate(
@@ -117,6 +148,7 @@ export class CameraDelegate implements CameraStreamingDelegate {
         accessory,
         this.videoConfig,
         this.videoProcessor,
+        cameraRecordingOptions,
       );
     }
 
@@ -161,37 +193,7 @@ export class CameraDelegate implements CameraStreamingDelegate {
         },
       },
       recording: !this.recordingActive ? undefined : {
-        options: {
-          prebufferLength: PREBUFFER_LENGTH,
-          overrideEventTriggerOptions: [hap.EventTriggerOption.MOTION, hap.EventTriggerOption.DOORBELL],
-          mediaContainerConfiguration: [{
-            type: 0,
-            fragmentLength: FRAGMENTS_LENGTH,
-          }],
-          video: {
-            type: hap.VideoCodecType.H264,
-            parameters: {
-              levels: [hap.H264Level.LEVEL3_1, hap.H264Level.LEVEL3_2, hap.H264Level.LEVEL4_0],
-              profiles: [hap.H264Profile.BASELINE, hap.H264Profile.MAIN, hap.H264Profile.HIGH],
-            },
-            resolutions: [
-              [320, 180, 30],
-              [320, 240, 15], // Apple Watch requires this configuration
-              [320, 240, 30],
-              [480, 270, 30],
-              [480, 360, 30],
-              [640, 360, 30],
-              [640, 480, 30],
-              [1280, 720, 30],
-              [1280, 960, 30],
-              [1920, 1080, 30],
-              [1600, 1200, 30],
-            ],
-          },
-          audio: {
-            codecs: recordingCodecs,
-          },
-        },
+        options: cameraRecordingOptions,
         delegate: this.recordingDelegate!,
       },
     };

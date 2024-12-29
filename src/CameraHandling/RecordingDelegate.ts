@@ -9,7 +9,7 @@ import {
   AudioRecordingCodecType,
   CameraController,
   CameraRecordingConfiguration,
-  CameraRecordingDelegate,
+  CameraRecordingDelegate, CameraRecordingOptions,
   H264Level,
   H264Profile,
   HDSProtocolSpecificErrorReason,
@@ -131,6 +131,7 @@ export class RecordingDelegate implements CameraRecordingDelegate {
   private preBufferSession?: Mp4Session;
   private preBuffer?: PreBuffer;
   private isTransmitting: boolean = false;
+  private recordingConfiguration?: CameraRecordingConfiguration;
   private sessions: Map<number, FFMpegFragmentedMP4Session> = new Map();
 
   constructor(
@@ -139,6 +140,7 @@ export class RecordingDelegate implements CameraRecordingDelegate {
     private readonly accessory: PlatformAccessory,
     private readonly videoConfig: VideoConfig,
     videoProcessor: string,
+    private readonly recordingOptions: CameraRecordingOptions,
   ) {
     this.log = platform.log;
     this.cameraName = device.name;
@@ -158,8 +160,9 @@ export class RecordingDelegate implements CameraRecordingDelegate {
     return Promise.resolve();
   }
 
-  updateRecordingConfiguration(): Promise<void> {
+  updateRecordingConfiguration(configuration: CameraRecordingConfiguration | undefined): Promise<void> {
     this.log.info('Recording configuration updated', this.cameraName);
+    this.recordingConfiguration = configuration;
     return Promise.resolve();
   }
 
@@ -172,9 +175,8 @@ export class RecordingDelegate implements CameraRecordingDelegate {
 
       await this.updateRecordingActive(this.isRecording);
     }
-    if(!this.sessions.has(streamId)) {
-      this.log.error(`No session found for stream-id ${streamId} and camera ${this.cameraName}`);
-      return;
+    if (!this.sessions.has(streamId)) {
+      this.sessions.set(streamId, await this.startSession());
     }
     const session: FFMpegFragmentedMP4Session = this.sessions.get(streamId)!;
     // Process our FFmpeg-generated segments and send them back to HKSV.
@@ -267,10 +269,13 @@ export class RecordingDelegate implements CameraRecordingDelegate {
   }
 
   private async startSession(
-    configuration: CameraRecordingConfiguration,
+    configuration?: CameraRecordingConfiguration,
     iframeIntervalSeconds: number = 4,
   ): Promise<FFMpegFragmentedMP4Session> {
-
+    configuration ??= this.recordingConfiguration
+    if(!configuration) {
+      throw new Error('No configuration provided');
+    }
     const audioArgs: Array<string> = [
       '-acodec',
       'libfdk_aac',
