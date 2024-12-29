@@ -53,8 +53,9 @@ export class CameraDelegate implements CameraStreamingDelegate {
   private readonly videoConfig: VideoConfig;
   private readonly videoUrl: string;
   private readonly videoProcessor: string;
-  private recordingDelegate: RecordingDelegate;
+  private recordingDelegate?: RecordingDelegate;
   private fn = 1;
+  private recordingActive: boolean = false;
 
   get hasSnapshotWithinLifetime() {
     return this.lastSnapshotTimestamp + snapShotLifeTime > new Date().getTime();
@@ -74,14 +75,15 @@ export class CameraDelegate implements CameraStreamingDelegate {
     }
     this.log = platform.log;
     this.ffmpegLog = new FfmpegLogger(this.log);
+    this.recordingActive = (platform.config as HoffmationConfig).cameraRecordingActive;
     this.log.debug(`Creating new CameraDelegate for ${this.device.name} with videoUrl ${this.videoUrl}`);
     this.videoConfig = {
       source: this.videoUrl,
       vcodec: 'copy',
       audio: device.cameraHasAudio,
       returnAudioTarget: device.cameraHasSpeaker ? ` return_audio_${device.id}.mp3` : undefined,
-      prebuffer: true,
-      recording: true,
+      prebuffer: this.recordingActive,
+      recording: this.recordingActive,
       debug: (platform.config as HoffmationConfig).debugCameraVideo,
       debugReturn: (platform.config as HoffmationConfig).debugCameraAudio,
       // maxStreams: 4,
@@ -90,6 +92,7 @@ export class CameraDelegate implements CameraStreamingDelegate {
       // maxFPS: 5,
     };
     this.videoProcessor = 'ffmpeg';
+
     const recordingCodecs: AudioRecordingCodec[] = [];
 
     const samplerate: AudioRecordingSamplerate[] = [];
@@ -106,13 +109,15 @@ export class CameraDelegate implements CameraStreamingDelegate {
       };
       recordingCodecs.push(entry);
     }
-
-    this.recordingDelegate = new RecordingDelegate(
-      this.platform,
-      this.device.name,
-      this.videoConfig,
-      this.videoProcessor,
-    );
+    if (this.recordingActive) {
+      this.recordingDelegate = new RecordingDelegate(
+        this.platform,
+        this.device,
+        accessory,
+        this.videoConfig,
+        this.videoProcessor,
+      );
+    }
 
     platform.api.on(APIEvent.SHUTDOWN, () => {
       for (const session in this.ongoingSessions) {
@@ -154,7 +159,7 @@ export class CameraDelegate implements CameraStreamingDelegate {
           ],
         },
       },
-      recording: /*!this.recording ? undefined : */ {
+      recording: !this.recordingActive ? undefined : {
         options: {
           prebufferLength: PREBUFFER_LENGTH,
           overrideEventTriggerOptions: [hap.EventTriggerOption.MOTION, hap.EventTriggerOption.DOORBELL],
@@ -186,7 +191,7 @@ export class CameraDelegate implements CameraStreamingDelegate {
             codecs: recordingCodecs,
           },
         },
-        delegate: this.recordingDelegate,
+        delegate: this.recordingDelegate!,
       },
     };
 

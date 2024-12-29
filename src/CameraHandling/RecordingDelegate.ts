@@ -14,6 +14,7 @@ import {
   H264Profile,
   HDSProtocolSpecificErrorReason,
   Logging,
+  PlatformAccessory,
   RecordingPacket,
 } from 'homebridge';
 
@@ -25,6 +26,7 @@ import { env } from 'node:process';
 
 import { Hoffmation } from '../platform';
 import { VideoConfig } from './VideoConfig';
+import { HoffmationApiDevice } from '../models/hoffmationApi/hoffmationApiDevice';
 
 
 export interface MP4Atom {
@@ -117,29 +119,9 @@ export async function* parseFragmentedMP4(readable: Readable): AsyncGenerator<MP
 }
 
 export class RecordingDelegate implements CameraRecordingDelegate {
-  updateRecordingActive(active: boolean): Promise<void> {
-    this.log.info(`Recording active status changed to: ${active}`, this.cameraName);
-    return Promise.resolve();
-  }
-
-  updateRecordingConfiguration(): Promise<void> {
-    this.log.info('Recording configuration updated', this.cameraName);
-    return Promise.resolve();
-  }
-
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error
-  async* handleRecordingStreamRequest(streamId: number): AsyncGenerator<RecordingPacket, unknown> {
-    this.log.info(`Recording stream request received for stream ID: ${streamId}`, this.cameraName);
-    // Implement the logic to handle the recording stream request here
-    // For now, just yield an empty RecordingPacket
-    yield {} as RecordingPacket;
-  }
-
-  closeRecordingStream(streamId: number, reason: HDSProtocolSpecificErrorReason | undefined): void {
-    this.log.info(`Recording stream closed for stream ID: ${streamId}, reason: ${reason}`, this.cameraName);
-  }
-
+  private transmittedSegments: number = 0;
+  private isRecording: boolean = false;
+  private isInitialized: boolean = false;
   private readonly log: Logging;
   private readonly cameraName: string;
   private process!: ChildProcess;
@@ -148,15 +130,18 @@ export class RecordingDelegate implements CameraRecordingDelegate {
   readonly controller?: CameraController;
   private preBufferSession?: Mp4Session;
   private preBuffer?: PreBuffer;
+  private isTransmitting: boolean = false;
+  private sessions: Map<number, FFMpegFragmentedMP4Session> = new Map();
 
   constructor(
     private readonly platform: Hoffmation,
-    cameraName: string,
+    private readonly device: HoffmationApiDevice,
+    private readonly accessory: PlatformAccessory,
     private readonly videoConfig: VideoConfig,
     videoProcessor: string,
   ) {
     this.log = platform.log;
-    this.cameraName = cameraName;
+    this.cameraName = device.name;
     this.videoProcessor = videoProcessor;
 
     platform.api.on(APIEvent.SHUTDOWN, () => {
@@ -165,6 +150,70 @@ export class RecordingDelegate implements CameraRecordingDelegate {
         this.preBufferSession.server?.close();
       }
     });
+  }
+
+  updateRecordingActive(active: boolean): Promise<void> {
+    this.log.info(`Recording active status changed to: ${active}`, this.cameraName);
+    this.isRecording = active;
+    return Promise.resolve();
+  }
+
+  updateRecordingConfiguration(): Promise<void> {
+    this.log.info('Recording configuration updated', this.cameraName);
+    return Promise.resolve();
+  }
+
+  async* handleRecordingStreamRequest(streamId: number): AsyncGenerator<RecordingPacket> {
+    // The first transmitted segment in an fMP4 stream is always the initialization segment and contains no video, so we don't count it.
+    this.transmittedSegments = 0;
+
+    // If we are recording HKSV events and we haven't fully initialized our timeshift buffer (e.g. offline cameras preventing us from doing so), then do so now.
+    if (this.accessory.context.hksvRecording && this.isRecording && !this.preBuffer) {
+
+      await this.updateRecordingActive(this.isRecording);
+    }
+    if(!this.sessions.has(streamId)) {
+      this.log.error(`No session found for stream-id ${streamId} and camera ${this.cameraName}`);
+      return;
+    }
+    const session: FFMpegFragmentedMP4Session = this.sessions.get(streamId)!;
+    // Process our FFmpeg-generated segments and send them back to HKSV.
+    for await (const segment of session.generator) {
+      if (session.cp.killed || session.cp.exitCode !== null) {
+        break;
+      }
+      // No segment doesn't mean we're done necessarily, but it does mean we need to wait for FFmpeg to catch up.
+      if (!segment) {
+        continue;
+      }
+
+      // Keep track of how many segments we're sending to HKSV.
+      this.transmittedSegments++;
+
+      // Send HKSV the fMP4 segment.
+      yield {data: segment.data, isLast: false};
+    }
+
+    // If FFmpeg timed out it's typically due to the quality of the video coming from the Protect controller. Restart the livestream API to see if we can improve things.
+    if (session.cp.killed || session.cp.exitCode !== null) {
+
+      // Send HKSV a final segment to cleanly wrap up.
+      yield {data: Buffer.alloc(1, 0), isLast: true};
+    }
+  }
+
+  closeRecordingStream(streamId: number, reason: HDSProtocolSpecificErrorReason | undefined): void {
+    this.log.info(`Recording stream closed for stream ID: ${streamId}, reason: ${reason}`, this.cameraName);
+    if (!this.sessions.has(streamId)) {
+      return;
+    }
+
+    const session = this.sessions.get(streamId);
+    if (session) {
+      this.sessions.delete(streamId);
+      session.cp.kill();
+      session.socket.destroy();
+    }
   }
 
   async startPreBuffer(): Promise<void> {
@@ -182,8 +231,45 @@ export class RecordingDelegate implements CameraRecordingDelegate {
 
   async* handleFragmentsRequests(configuration: CameraRecordingConfiguration): AsyncGenerator<Buffer, void, unknown> {
     this.log.debug('video fragments requested', this.cameraName);
+    const session: FFMpegFragmentedMP4Session = await this.startSession(configuration);
 
-    const iframeIntervalSeconds = 4;
+    const {socket, cp, generator} = session;
+    let pending: Array<Buffer> = [];
+    let filebuffer: Buffer = Buffer.alloc(0);
+    try {
+      for await (const box of generator) {
+        const {header, type, length, data} = box;
+
+        pending.push(header, data);
+
+        if (type === 'moov' || type === 'mdat') {
+          const fragment = Buffer.concat(pending);
+          filebuffer = Buffer.concat([filebuffer, Buffer.concat(pending)]);
+          pending = [];
+          yield fragment;
+        }
+        this.log.debug(`mp4 box type ${type} and length: ${length}`, this.cameraName);
+      }
+    } catch (e) {
+      this.log.info(`Recoding completed. ${e}`, this.cameraName);
+      /*
+            const homedir = require('os').homedir();
+            const path = require('path');
+            const writeStream = fs.createWriteStream(homedir+path.sep+Date.now()+'_video.mp4');
+            writeStream.write(filebuffer);
+            writeStream.end();
+            */
+    } finally {
+      socket.destroy();
+      cp.kill();
+      // this.server.close;
+    }
+  }
+
+  private async startSession(
+    configuration: CameraRecordingConfiguration,
+    iframeIntervalSeconds: number = 4,
+  ): Promise<FFMpegFragmentedMP4Session> {
 
     const audioArgs: Array<string> = [
       '-acodec',
@@ -222,8 +308,7 @@ export class RecordingDelegate implements CameraRecordingDelegate {
       level,
       '-b:v',
       `${configuration.videoCodec.parameters.bitRate}k`,
-      '-force_key_frames',
-      `expr:eq(t,n_forced*${iframeIntervalSeconds})`,
+      `${iframeIntervalSeconds > 0 ? `-force_key_frames expr:eq(t,n_forced*${iframeIntervalSeconds})` : ''}`,
       '-r',
       configuration.videoCodec.resolution[2].toString(),
     ];
@@ -242,38 +327,7 @@ export class RecordingDelegate implements CameraRecordingDelegate {
 
     const session = await this.startFFMPegFragmetedMP4Session(this.videoProcessor, ffmpegInput, audioArgs, videoArgs);
     this.log.info('Recording started', this.cameraName);
-
-    const {socket, cp, generator} = session;
-    let pending: Array<Buffer> = [];
-    let filebuffer: Buffer = Buffer.alloc(0);
-    try {
-      for await (const box of generator) {
-        const {header, type, length, data} = box;
-
-        pending.push(header, data);
-
-        if (type === 'moov' || type === 'mdat') {
-          const fragment = Buffer.concat(pending);
-          filebuffer = Buffer.concat([filebuffer, Buffer.concat(pending)]);
-          pending = [];
-          yield fragment;
-        }
-        this.log.debug(`mp4 box type ${type} and length: ${length}`, this.cameraName);
-      }
-    } catch (e) {
-      this.log.info(`Recoding completed. ${e}`, this.cameraName);
-      /*
-            const homedir = require('os').homedir();
-            const path = require('path');
-            const writeStream = fs.createWriteStream(homedir+path.sep+Date.now()+'_video.mp4');
-            writeStream.write(filebuffer);
-            writeStream.end();
-            */
-    } finally {
-      socket.destroy();
-      cp.kill();
-      // this.server.close;
-    }
+    return session;
   }
 
   async startFFMPegFragmetedMP4Session(ffmpegPath: string, ffmpegInput: Array<string>, audioOutputArgs: Array<string>, videoOutputArgs: Array<string>): Promise<FFMpegFragmentedMP4Session> {
