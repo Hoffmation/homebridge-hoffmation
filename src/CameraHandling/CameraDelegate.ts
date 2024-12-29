@@ -191,6 +191,15 @@ export class CameraDelegate implements CameraStreamingDelegate {
     };
 
     this.controller = new hap.CameraController(options);
+
+    setTimeout(() => {
+      if (this.videoConfig?.prebuffer) {
+        this.log.debug('Start prebuffering...', this.device.name);
+        if (this.recordingDelegate) {
+          this.recordingDelegate.startPreBuffer();
+        }
+      }
+    });
   }
 
   public updateDeviceData(data: HoffmationApiDevice) {
@@ -419,7 +428,7 @@ export class CameraDelegate implements CameraStreamingDelegate {
           += ` -ssrc ${sessionInfo.audioSSRC} -f rtp`
           + ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80'
           + ` -srtp_out_params ${
-          sessionInfo.audioSRTP.toString('base64')} srtp://${sessionInfo.address}:${sessionInfo.audioPort}?rtcpport=${sessionInfo.audioPort}&pkt_size=188`;
+            sessionInfo.audioSRTP.toString('base64')} srtp://${sessionInfo.address}:${sessionInfo.audioPort}?rtcpport=${sessionInfo.audioPort}&pkt_size=188`;
       } else {
         this.log.error('Unsupported audio codec requested: ' + request.audio.codec, this.device.name);
       }
