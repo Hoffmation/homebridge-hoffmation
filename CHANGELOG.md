@@ -5,8 +5,9 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
-## **WORK IN PROGRESS**
+## 0.5.3-alpha.9 (2024-12-29)
 * (theimo1221) Stabilize Recording
+
 ## 0.5.3-alpha.8 (2024-12-29)
 * (theimo1221) Save and use Configuration
 
