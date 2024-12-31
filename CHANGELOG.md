@@ -8,6 +8,7 @@
 ## **WORK IN PROGRESS**
 * (theimo1221) Some changes to audio and experimental HKSV support
 * (theimo1221) Allow option to skip certain devices for homebridge
+* (theimo1221) Disable 2 Way Audio on cameras with only a speaker
 
 ## 0.5.2 (2024-12-26)
 * (theimo1221) Hap Dependency is needed as direct dependency
