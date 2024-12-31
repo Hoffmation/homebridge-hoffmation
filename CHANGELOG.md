@@ -5,7 +5,7 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
-## **WORK IN PROGRESS**
+## 0.5.3 (2024-12-31)
 * (theimo1221) Some changes to audio and experimental HKSV support
 * (theimo1221) Allow option to skip certain devices for homebridge
 * (theimo1221) Disable 2 Way Audio on cameras with only a speaker
