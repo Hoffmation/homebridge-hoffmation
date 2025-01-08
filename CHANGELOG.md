@@ -5,8 +5,9 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
-## **WORK IN PROGRESS**
+## 0.5.5 (2025-01-08)
 * (theimo1221) Correct last patch
+
 ## 0.5.4 (2025-01-08)
 * (theimo1221) Make camera video optional
 
