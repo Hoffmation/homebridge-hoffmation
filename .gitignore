@@ -2,6 +2,7 @@
 dist
 
 # ------------- Defaults ------------- #
+/upload_to_dtrack.sh
 
 # Logs
 logs

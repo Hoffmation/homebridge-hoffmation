@@ -21,6 +21,10 @@ export class Hoffmation implements DynamicPlatformPlugin {
   private readonly _api: HoffmationApi;
   private devicesDict: { [id: string]: HoffmationDevice } = {};
 
+  public get hoffmationConfig(): HoffmationConfig {
+    return this.config as HoffmationConfig;
+  }
+
   constructor(
     public readonly log: Logging,
     public readonly config: PlatformConfig,

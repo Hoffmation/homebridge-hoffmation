@@ -8,6 +8,7 @@ export interface HoffmationConfig extends PlatformConfig {
   readonly useActuatorDevices: boolean;
   readonly useCameraDevices: boolean;
   readonly cameraRecordingActive: boolean;
+  readonly displayCameraVideo: boolean;
   readonly debugCameraAudio: boolean;
   readonly debugCameraVideo: boolean;
   readonly useGarageDoorDevices: boolean;

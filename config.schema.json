@@ -89,6 +89,12 @@
         "required": true,
         "default": false
       },
+      "displayCameraVideo": {
+        "title": "Whether to add camera video to homekit",
+        "type": "boolean",
+        "required": true,
+        "default": true
+      },
       "cameraRecordingActive": {
         "title": "Whether Secure Camera Recording should be active",
         "type": "boolean",
