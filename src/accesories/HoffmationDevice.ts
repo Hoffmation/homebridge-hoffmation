@@ -142,7 +142,7 @@ export class HoffmationDevice {
       this.temperatureService.getCharacteristic(this.platform.Characteristic.CurrentTemperature)
         .onGet(this.getTemperature.bind(this));
     }
-    if (caps.includes(DeviceCapability.camera) && this.platform.hoffmationConfig.displayCamera) {
+    if (caps.includes(DeviceCapability.camera) && this.platform.hoffmationConfig.displayCameraVideo) {
       this.cameraDelegate = new CameraDelegate(this.platform, accessory, this.device, api);
       accessory.configureController(
         this.cameraDelegate.controller,
