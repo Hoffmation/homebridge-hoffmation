@@ -189,7 +189,7 @@ export class HoffmationDevice {
       this.temperatureService?.updateCharacteristic(this.platform.Characteristic.CurrentTemperature, data.temperature);
     }
     if (caps.includes(DeviceCapability.handleSensor)) {
-      this.handleService?.updateCharacteristic(this.platform.Characteristic.CurrentPosition, data.currentHandlePosition);
+      this.handleService?.updateCharacteristic(this.platform.Characteristic.LockCurrentState, data.currentHandlePosition);
     }
     if (caps.includes(DeviceCapability.shutter)) {
       this.shutterService?.updateCharacteristic(this.platform.Characteristic.CurrentPosition, data.currentShutterPosition);
@@ -405,7 +405,8 @@ export class HoffmationDevice {
     }
     if (this.cachedDevice !== undefined) {
       return this.cachedDevice.currentHandlePosition;
-    }const update = await this.updateSelf();
+    }
+    const update = await this.updateSelf();
     if (!update) {
       return LockCurrentState.UNKNOWN;
     }

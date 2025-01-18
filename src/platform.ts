@@ -72,7 +72,7 @@ export class Hoffmation implements DynamicPlatformPlugin {
 
       this.log.info(`Connection established got ${devices.length} devices`);
       this.processDevices(devices);
-      setInterval(this.updateAllDevices.bind(this), 15000);
+      setInterval(this.updateAllDevices.bind(this), 10000);
     });
   }
 
