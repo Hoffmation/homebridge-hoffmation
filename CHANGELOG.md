@@ -5,8 +5,9 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
-## **WORK IN PROGRESS**
-* (theimo1221) Fix Handle State update 
+## 0.5.6 (2025-01-18)
+* (theimo1221) Fix Handle State update
+
 ## 0.5.5 (2025-01-08)
 * (theimo1221) Correct last patch
 
