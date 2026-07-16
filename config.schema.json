@@ -17,6 +17,11 @@
         "required": true,
         "default": "http://localhost:3000"
       },
+      "apiToken": {
+        "title": "API Token",
+        "type": "string",
+        "description": "Bearer token for Hoffmation-Express auth (required when server runs in 'enforced' mode)"
+      },
       "useRtspStream": {
         "title": "Use Rtsp Stream",
         "type": "boolean",
