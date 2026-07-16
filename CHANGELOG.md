@@ -5,8 +5,9 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
-## **WORK IN PROGRESS**
+## 1.0.0 (2026-07-16)
 * (theimo1221) V2 Homebridge Support
+
 ## 0.6.1 (2026-07-16)
 * (theimo1221) Update packages
 * (theimo1221) Implement auth
