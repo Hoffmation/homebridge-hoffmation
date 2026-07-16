@@ -5,9 +5,10 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
-## **WORK IN PROGRESS**
+## 0.6.0 (2026-07-16)
 * (theimo1221) Update packages
 * (theimo1221) Implement auth
+
 ## 0.5.6 (2025-01-18)
 * (theimo1221) Fix Handle State update
 
