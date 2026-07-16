@@ -4,7 +4,7 @@ import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 import { HoffmationDevice } from './accesories/HoffmationDevice';
 import { HoffmationConfig } from './models/config';
 import { HoffmationApi } from './api';
-import { DeviceCapability } from 'hoffmation-base/lib/server/devices/DeviceCapability';
+import { DeviceCapability } from 'hoffmation-base/lib/enums/DeviceCapability';
 import { HoffmationApiDevice } from './models/hoffmationApi/hoffmationApiDevice';
 
 /**

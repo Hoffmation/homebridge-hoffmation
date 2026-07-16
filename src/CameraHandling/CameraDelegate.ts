@@ -24,7 +24,6 @@ import {
 } from 'homebridge';
 import { HoffmationApiDevice } from '../models/hoffmationApi/hoffmationApiDevice';
 import { pickPort, Type } from 'pick-port';
-import got, { Headers, Options as RequestOptions } from 'got';
 import { hap } from '../hap';
 import { createSocket, Socket } from 'dgram';
 import { APIEvent } from 'homebridge/lib/api';
@@ -562,13 +561,7 @@ export class CameraDelegate implements CameraStreamingDelegate {
       response = await this.api.getCameraLastMotionImage(this.device.id);
     } else {
       // this.platform.log(`Camera ${this.device.name} has no motion detected since ${timeSinceLastDetectedMotion}ms, fetching snapshot image.`)
-      response = await this.request<Buffer>({
-        url: this.device.snapshotUrl + `&fn=${this.fn++}`,
-        responseType: 'buffer',
-        headers: {
-          accept: 'image/jpeg',
-        },
-      });
+      response = await this.fetchSnapshot(this.device.snapshotUrl + `&fn=${this.fn++}`);
     }
 
     const {responseTimestamp, timeMillis} = response;
@@ -579,30 +572,27 @@ export class CameraDelegate implements CameraStreamingDelegate {
     return response;
   }
 
-  private async request<T>(requestOptions: RequestOptions): Promise<T & ExtendedResponse> {
-    const defaultRequestOptions: RequestOptions = {
-      responseType: 'json',
-      method: 'GET',
-      retry: 0,
-      timeout: 20000,
-    };
-    const options = {
-      ...defaultRequestOptions,
-      ...requestOptions,
-    };
-    const {headers, body} = (await got(options)) as {
-      headers: Headers;
-      body: unknown;
-    };
-    const data = body as T & ExtendedResponse;
-    if (data !== null && typeof data === 'object') {
-      if (headers.date) {
-        data.responseTimestamp = new Date(headers.date as string).getTime();
-      }
-
-      if (headers['x-time-millis']) {
-        data.timeMillis = Number(headers['x-time-millis']);
-      }
+  private async fetchSnapshot(url: string): Promise<Buffer & ExtendedResponse> {
+    const headers: Record<string, string> = { accept: 'image/jpeg' };
+    const { apiToken } = this.platform.hoffmationConfig;
+    if (apiToken) {
+      headers['Authorization'] = `Bearer ${apiToken}`;
+    }
+    const res = await fetch(url, {
+      headers,
+      signal: AbortSignal.timeout(20000),
+    });
+    if (!res.ok) {
+      throw new Error(`Snapshot fetch failed: ${res.status}`);
+    }
+    const data = Buffer.from(await res.arrayBuffer()) as Buffer & ExtendedResponse;
+    const dateHeader = res.headers.get('date');
+    if (dateHeader) {
+      data.responseTimestamp = new Date(dateHeader).getTime();
+    }
+    const timeMillisHeader = res.headers.get('x-time-millis');
+    if (timeMillisHeader) {
+      data.timeMillis = Number(timeMillisHeader);
     }
     return data;
   }

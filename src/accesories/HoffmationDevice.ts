@@ -2,7 +2,7 @@ import { CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
 
 import { Hoffmation } from '../platform';
 import { HoffmationApi } from '../api';
-import { DeviceCapability } from 'hoffmation-base/lib/server/devices/DeviceCapability';
+import { DeviceCapability } from 'hoffmation-base/lib/enums/DeviceCapability';
 import { HoffmationApiDevice } from '../models/hoffmationApi/hoffmationApiDevice';
 import { CameraDelegate } from '../CameraHandling/CameraDelegate';
 import {

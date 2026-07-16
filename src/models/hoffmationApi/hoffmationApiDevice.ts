@@ -1,4 +1,4 @@
-import { DeviceCapability } from 'hoffmation-base/lib/server/devices/DeviceCapability';
+import { DeviceCapability } from 'hoffmation-base/lib/enums/DeviceCapability';
 import { HoffmationApiDeviceInfo } from './HoffmationApiDeviceInfo';
 import { CurrentDoorState, LockCurrentState, TargetDoorState } from 'hap-nodejs/dist/lib/definitions/CharacteristicDefinitions';
 
