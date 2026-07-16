@@ -5,12 +5,6 @@ import { HoffmationApi } from '../api';
 import { DeviceCapability } from 'hoffmation-base/lib/enums/DeviceCapability';
 import { HoffmationApiDevice } from '../models/hoffmationApi/hoffmationApiDevice';
 import { CameraDelegate } from '../CameraHandling/CameraDelegate';
-import {
-  CurrentDoorState,
-  LockCurrentState,
-  LockTargetState,
-  SmokeDetected,
-} from 'hap-nodejs/dist/lib/definitions/CharacteristicDefinitions';
 
 /**
  * Platform Accessory
@@ -290,15 +284,15 @@ export class HoffmationDevice {
 
   async getSmoke(): Promise<CharacteristicValue> {
     if (!this.device.deviceCapabilities.includes(DeviceCapability.smokeSensor)) {
-      return SmokeDetected.SMOKE_NOT_DETECTED;
+      return this.platform.Characteristic.SmokeDetected.SMOKE_NOT_DETECTED;
     }
     if (this.cachedDevice !== undefined) {
-      return this.cachedDevice.smokeDetected ? SmokeDetected.SMOKE_DETECTED : SmokeDetected.SMOKE_NOT_DETECTED;
+      return this.cachedDevice.smokeDetected ? this.platform.Characteristic.SmokeDetected.SMOKE_DETECTED : this.platform.Characteristic.SmokeDetected.SMOKE_NOT_DETECTED;
     }
 
     const update = await this.updateSelf();
     if (!update) {
-      return SmokeDetected.SMOKE_NOT_DETECTED;
+      return this.platform.Characteristic.SmokeDetected.SMOKE_NOT_DETECTED;
     }
     return this.getSmoke();
   }
@@ -396,19 +390,19 @@ export class HoffmationDevice {
   }
 
   async getHandleTargetPos(): Promise<CharacteristicValue> {
-    return LockTargetState.SECURED;
+    return this.platform.Characteristic.LockTargetState.SECURED;
   }
 
   async getHandleCurrentPos(): Promise<CharacteristicValue> {
     if (!this.device.deviceCapabilities.includes(DeviceCapability.handleSensor)) {
-      return LockCurrentState.UNKNOWN;
+      return this.platform.Characteristic.LockCurrentState.UNKNOWN;
     }
     if (this.cachedDevice !== undefined) {
       return this.cachedDevice.currentHandlePosition;
     }
     const update = await this.updateSelf();
     if (!update) {
-      return LockCurrentState.UNKNOWN;
+      return this.platform.Characteristic.LockCurrentState.UNKNOWN;
     }
     return this.getHandleCurrentPos();
   }
@@ -430,7 +424,7 @@ export class HoffmationDevice {
 
   async getGarageDoorCurrentState(): Promise<CharacteristicValue> {
     if (!this.device.deviceCapabilities.includes(DeviceCapability.garageDoorOpener)) {
-      return CurrentDoorState.STOPPED;
+      return this.platform.Characteristic.CurrentDoorState.STOPPED;
     }
     if (this.cachedDevice !== undefined) {
       return this.cachedDevice.currentGarageDoorState;
@@ -438,14 +432,14 @@ export class HoffmationDevice {
 
     const update = await this.updateSelf();
     if (!update) {
-      return CurrentDoorState.STOPPED;
+      return this.platform.Characteristic.CurrentDoorState.STOPPED;
     }
     return this.getGarageDoorCurrentState();
   }
 
   async getGarageDoorTargetState(): Promise<CharacteristicValue> {
     if (!this.device.deviceCapabilities.includes(DeviceCapability.garageDoorOpener)) {
-      return CurrentDoorState.OPEN;
+      return this.platform.Characteristic.CurrentDoorState.OPEN;
     }
     if (this.cachedDevice !== undefined) {
       return this.cachedDevice.targetGarageDoorState;
@@ -453,7 +447,7 @@ export class HoffmationDevice {
 
     const update = await this.updateSelf();
     if (!update) {
-      return CurrentDoorState.OPEN;
+      return this.platform.Characteristic.CurrentDoorState.OPEN;
     }
     return this.getGarageDoorTargetState();
   }

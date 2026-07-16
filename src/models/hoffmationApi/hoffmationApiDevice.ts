@@ -1,6 +1,9 @@
 import { DeviceCapability } from 'hoffmation-base/lib/enums/DeviceCapability';
 import { HoffmationApiDeviceInfo } from './HoffmationApiDeviceInfo';
-import { CurrentDoorState, LockCurrentState, TargetDoorState } from 'hap-nodejs/dist/lib/definitions/CharacteristicDefinitions';
+// HAP spec numeric constants — stable across versions
+const enum LockCurrentState { UNSECURED = 0, SECURED = 1, JAMMED = 2, UNKNOWN = 3 }
+const enum TargetDoorState { OPEN = 0, CLOSED = 1 }
+const enum CurrentDoorState { OPEN = 0, CLOSED = 1, OPENING = 2, CLOSING = 3, STOPPED = 4 }
 
 export class HoffmationApiDevice {
   public get rtspUrl(): string {

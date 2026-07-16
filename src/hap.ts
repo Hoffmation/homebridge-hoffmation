@@ -1,4 +1,4 @@
-import { HAP } from 'homebridge/lib/api';
+import { HAP } from 'homebridge';
 
 export let hap: HAP;
 

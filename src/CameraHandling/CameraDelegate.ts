@@ -26,7 +26,7 @@ import { HoffmationApiDevice } from '../models/hoffmationApi/hoffmationApiDevice
 import { pickPort, Type } from 'pick-port';
 import { hap } from '../hap';
 import { createSocket, Socket } from 'dgram';
-import { APIEvent } from 'homebridge/lib/api';
+import { APIEvent } from 'homebridge';
 import { FfmpegProcess } from './ffmpeg-process';
 import { FfmpegLogger } from './ffmpeg-logger';
 import { ExtendedResponse } from './ExtendedResponse';
