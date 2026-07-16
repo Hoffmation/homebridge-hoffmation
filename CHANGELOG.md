@@ -5,7 +5,7 @@
   ## **WORK IN PROGRESS**
   * (theimo1221) Update packages
 -->
-## 0.6.0 (2026-07-16)
+## **WORK IN PROGRESS**
 * (theimo1221) Update packages
 * (theimo1221) Implement auth
 
